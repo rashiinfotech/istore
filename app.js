@@ -19,11 +19,12 @@ app.use(express.urlencoded({ extended: true }));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(flash());
 app.use(nocache());
+require('dotenv').config();
 
 
 //session
 app.use(session({
-    secret: 'ffaafafaaday',
+    secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: true
 }));
@@ -34,10 +35,13 @@ app.set('views', path.join(__dirname, 'views'));
 const error = "mongodb error"
 
 // MongoDB connection 
-mongoose.connect("mongodb://localhost:27017/istore").then(() => {
-    console.log("Connected to MongoDB");
+mongoose.connect(process.env.MONGODB_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+}).then(() => {
+  console.log("Connected to MongoDB");
 }).catch((error) => {
-    console.log("Error connecting to MongoDB:", error);
+  console.log("Error connecting to MongoDB:", error);
 });
 
 // Multer configuration
