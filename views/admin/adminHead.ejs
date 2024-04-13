@@ -1,0 +1,392 @@
+<!doctype html>
+<html class="no-js" lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <title>istore Admin Panel</title>
+  <meta name="description" content="">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="apple-touch-icon" href="apple-touch-icon.html">
+  <!-- Place favicon.ico in the root directory -->
+  <link rel="stylesheet" href="../../static/admin/css/vendor.css">
+  <link rel="stylesheet" href="../../static/admin/css/app.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
+
+  <!-- Theme initialization -->
+  <script>
+    var themeSettings = (localStorage.getItem('themeSettings')) ? JSON.parse(localStorage.getItem('themeSettings')) :
+      {};
+    var themeName = themeSettings.themeName || '';
+    if (themeName) {
+      document.write('<link rel="stylesheet" id="theme-style" href="css/app.css">');
+    }
+    else {
+      document.write('<link rel="stylesheet" id="theme-style" href="css/app.css">');
+    
+    // }
+  </script>
+</head>
+
+<body>
+
+  <div class="main-wrapper">
+    <div class="app" id="app">
+      <header class="header">
+        <div class="header-block header-block-collapse d-lg-none d-xl-none">
+          <button class="collapse-btn" id="sidebar-collapse-btn">
+            <i class="fa fa-bars"></i>
+          </button>
+        </div>
+        <div class="header-block header-block-search">
+          <form role="search">
+            <div class="input-container">
+              <i class="fa fa-search"></i>
+              <input type="search" placeholder="Search">
+              <div class="underline"></div>
+            </div>
+          </form>
+        </div>
+        <div>
+
+        </div>
+        <div class="header-block header-block-nav">
+          <ul class="nav-profile">
+
+
+            </a>
+
+            </li>
+            <li class="profile dropdown">
+              <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true"
+                aria-expanded="false">
+                <div class="img"
+                  style="background-image: url('https://avatars3.githubusercontent.com/u/3959008?v=3&amp;s=40')"> </div>
+                <span class="name">
+                  <%= user.username %>
+                </span>
+              </a>
+              <div class="dropdown-menu profile-dropdown-menu" aria-labelledby="dropdownMenu1">
+                <a class="dropdown-item" href="#">
+                  <i class="fa fa-user icon"></i> Profile </a>
+                <a class="dropdown-item" href="#">
+                  <i class="fa fa-bell icon"></i> Notifications </a>
+                <a class="dropdown-item" href="#">
+                  <i class="fa fa-gear icon"></i> Settings </a>
+                <div class="dropdown-divider"></div>
+                <a class="dropdown-item" href="/admin/adminLogout">
+                  <i class="fa fa-power-off icon"></i> Logout
+                </a>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </header>
+      <aside class="sidebar">
+        <div class="sidebar-container">
+          <div class="sidebar-header">
+            <div class="brand">
+              <div >
+                <div >
+                  <img src="../../static/img/logo.png" alt="Logo" class="img-fluid mx-auto" style="max-width: 150px;"> 
+                  </div>
+                  <div></div>
+                <span class="l l1"></span>
+                <span class="l l2"></span>
+                <span class="l l3"></span>
+                <span class="l l4"></span>
+                <span class="l l5"></span>
+              </div >  
+              <div class="container" >
+              <div class="col-md-0 offset-md-0 ">
+            <div><h4>Admin Panel</h5></div></div>
+            </div>
+          </div>
+          <nav class="menu">
+            <ul class="sidebar-menu metismenu" id="sidebar-menu">
+              <li class="active">
+                <a href="dashboard">
+                  <i class="fa fa-home"></i> Dashboard </a>
+              </li>
+              <li>
+                <a href="#">
+                  <i class="fa fa-th-large"></i> Products Manager
+                  <i class="fa arrow"></i>
+                </a>
+                <ul class="sidebar-nav">
+                  <li>
+                    <a href="/admin/items-list"> Items List </a>
+                  </li>
+                  <li>
+                    <a href="/admin/add-item"> Add item </a>
+                  </li>
+                </ul>
+              </li>
+              <li>
+                <a href="#">
+                  <i class="fa fa-archive" ></i> Category Manager
+                  <i class="fa arrow"></i>
+                </a>
+                <ul class="sidebar-nav">
+                  <li>
+                    <a href="/admin/cat-list"> Category List </a>
+                  </li>
+                  <li>
+                    <a href="/admin/add-cat"> Add Category </a>
+                  </li>
+                </ul>
+              </li>
+              <li>
+                <a href="#">
+                  <i class="fa fa-users"></i> User Manager
+                  <i class="fa arrow"></i>
+                </a>
+                <ul class="sidebar-nav">
+                  <li>
+                     <a href="/admin/userManagment"> Users List </a>
+                  </li>
+                  
+                </ul>
+              </li>
+              <li>
+                <a href="#">
+                  <i class="fa fa-area-chart"></i> Charts
+                  <i class="fa arrow"></i>
+                </a>
+                <ul class="sidebar-nav">
+                  <li>
+                    <a href="charts-flot.html"> Flot Charts </a>
+                  </li>
+                  <li>
+                    <a href="charts-morris.html"> Morris Charts </a>
+                  </li>
+                </ul>
+              </li>
+              <li>
+                <a href="#">
+                  <i class="fa fa-table"></i> Tables
+                  <i class="fa arrow"></i>
+                </a>
+                <ul class="sidebar-nav">
+                  <li>
+                    <a href="static-tables.html"> Static Tables </a>
+                  </li>
+                  <li>
+                    <a href="responsive-tables.html"> Responsive Tables </a>
+                  </li>
+                </ul>
+              </li>
+              <li>
+                <a href="forms.html">
+                  <i class="fa fa-pencil-square-o"></i> Forms </a>
+              </li>
+              <li>
+                <a href="#">
+                  <i class="fa fa-desktop"></i> UI Elements
+                  <i class="fa arrow"></i>
+                </a>
+                <ul class="sidebar-nav">
+                  <li>
+                    <a href="buttons.html"> Buttons </a>
+                  </li>
+                  <li>
+                    <a href="cards.html"> Cards </a>
+                  </li>
+                  <li>
+                    <a href="typography.html"> Typography </a>
+                  </li>
+                  <li>
+                    <a href="icons.html"> Icons </a>
+                  </li>
+                  <li>
+                    <a href="grid.html"> Grid </a>
+                  </li>
+                </ul>
+              </li>
+              <li>
+                <a href="#">
+                  <i class="fa fa-file-text-o"></i> Pages
+                  <i class="fa arrow"></i>
+                </a>
+                <ul class="sidebar-nav">
+                  <li>
+                    <a href="login.html"> Login </a>
+                  </li>
+                  <li>
+                    <a href="signup.html"> Sign Up </a>
+                  </li>
+                  <li>
+                    <a href="reset.html"> Reset </a>
+                  </li>
+                  <li>
+                    <a href="error-404.html"> Error 404 App </a>
+                  </li>
+                  <li>
+                    <a href="error-404-alt.html"> Error 404 Global </a>
+                  </li>
+                  <li>
+                    <a href="error-500.html"> Error 500 App </a>
+                  </li>
+                  <li>
+                    <a href="error-500-alt.html"> Error 500 Global </a>
+                  </li>
+                </ul>
+              </li>
+              <li>
+                <a href="#">
+                  <i class="fa fa-sitemap"></i> Menu Levels
+                  <i class="fa arrow"></i>
+                </a>
+                <ul class="sidebar-nav">
+                  <li>
+                    <a href="#"> Second Level Item
+                      <i class="fa arrow"></i>
+                    </a>
+                    <ul class="sidebar-nav">
+                      <li>
+                        <a href="#"> Third Level Item </a>
+                      </li>
+                      <li>
+                        <a href="#"> Third Level Item </a>
+                      </li>
+                    </ul>
+                  </li>
+                  <li>
+                    <a href="#"> Second Level Item </a>
+                  </li>
+                  <li>
+                    <a href="#"> Second Level Item
+                      <i class="fa arrow"></i>
+                    </a>
+                    <ul class="sidebar-nav">
+                      <li>
+                        <a href="#"> Third Level Item </a>
+                      </li>
+                      <li>
+                        <a href="#"> Third Level Item </a>
+                      </li>
+                      <li>
+                        <a href="#"> Third Level Item
+                          <i class="fa arrow"></i>
+                        </a>
+                        <ul class="sidebar-nav">
+                          <li>
+                            <a href="#"> Fourth Level Item </a>
+                          </li>
+                          <li>
+                            <a href="#"> Fourth Level Item </a>
+                          </li>
+                        </ul>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </li>
+              <li>
+                <a href="screenful.html">
+                  <i class="fa fa-bar-chart"></i> Agile Metrics
+                  <span class="label label-screenful">by Screenful</span>
+                </a>
+              </li>
+
+            </ul>
+          </nav>
+        </div>
+        <footer class="sidebar-footer">
+          <ul class="sidebar-menu metismenu" id="customize-menu">
+            <li>
+              <ul>
+                <li class="customize">
+                  <div class="customize-item">
+                    <div class="row customize-header">
+                      <div class="col-4"> </div>
+                      <div class="col-4">
+                        <label class="title">fixed</label>
+                      </div>
+                      <div class="col-4">
+                        <label class="title">static</label>
+                      </div>
+                    </div>
+                    <div class="row">
+                      <div class="col-4">
+                        <label class="title">Sidebar:</label>
+                      </div>
+                      <div class="col-4">
+                        <label>
+                          <input class="radio" type="radio" name="sidebarPosition" value="sidebar-fixed">
+                          <span></span>
+                        </label>
+                      </div>
+                      <div class="col-4">
+                        <label>
+                          <input class="radio" type="radio" name="sidebarPosition" value="">
+                          <span></span>
+                        </label>
+                      </div>
+                    </div>
+                    <div class="row">
+                      <div class="col-4">
+                        <label class="title">Header:</label>
+                      </div>
+                      <div class="col-4">
+                        <label>
+                          <input class="radio" type="radio" name="headerPosition" value="header-fixed">
+                          <span></span>
+                        </label>
+                      </div>
+                      <div class="col-4">
+                        <label>
+                          <input class="radio" type="radio" name="headerPosition" value="">
+                          <span></span>
+                        </label>
+                      </div>
+                    </div>
+                    <div class="row">
+                      <div class="col-4">
+                        <label class="title">Footer:</label>
+                      </div>
+                      <div class="col-4">
+                        <label>
+                          <input class="radio" type="radio" name="footerPosition" value="footer-fixed">
+                          <span></span>
+                        </label>
+                      </div>
+                      <div class="col-4">
+                        <label>
+                          <input class="radio" type="radio" name="footerPosition" value="">
+                          <span></span>
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="customize-item">
+                    <ul class="customize-colors">
+                      <li>
+                        <span class="color-item color-red" data-theme="red"></span>
+                      </li>
+                      <li>
+                        <span class="color-item color-orange" data-theme="orange"></span>
+                      </li>
+                      <li>
+                        <span class="color-item color-green active" data-theme=""></span>
+                      </li>
+                      <li>
+                        <span class="color-item color-seagreen" data-theme="seagreen"></span>
+                      </li>
+                      <li>
+                        <span class="color-item color-blue" data-theme="blue"></span>
+                      </li>
+                      <li>
+                        <span class="color-item color-purple" data-theme="purple"></span>
+                      </li>
+                    </ul>
+                  </div>
+                </li>
+              </ul>
+              <a href="#">
+                <i class="fa fa-cog"></i> Customize </a>
+            </li>
+          </ul>
+        </footer>
+      </aside>

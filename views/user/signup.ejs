@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html class="no-js" lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <title>istore User Login</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="../../static/user/css/vendor.css">
+    <link rel="stylesheet" href="../../static/user/css/app.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <!-- Include the Google Sign-In JavaScript SDK -->
+    <script src="https://apis.google.com/js/platform.js" async defer></script>
+</head>
+
+<body>
+    <div class="auth">
+        <div class="auth-container">
+            <div class="card">
+                <header class="auth-header">
+                    <h1 class="auth-title">
+                        <div class="logo">
+                            <span class="l l1"></span>
+                            <span class="l l2"></span>
+                            <span class="l l3"></span>
+                            <span class="l l4"></span>
+                            <span class="l l5"></span>
+                        </div> istore User
+                    </h1>
+                </header>
+                <div class="auth-content">
+                    <p class="text-center">SIGNUP TO GET INSTANT ACCESS</p>
+                    <% if (successMessage) { %>
+                        <div class="alert alert-success" role="alert">
+                            <%= successMessage %>
+                        </div>
+                        <% } %>
+    
+                        <% if (errorMessage) { %>
+                        <div class="alert alert-danger" role="alert">
+                            <%= errorMessage %>
+                        </div>
+                        <% } %>
+    
+                        <% if (errors && errors.length > 0) { %>
+                        <div class="alert alert-danger" role="alert">
+                            <h4 class="alert-heading">Validation Error!</h4>
+                            <ul>
+                                <% errors.forEach(error => { %>
+                                <li><%= error.msg %></li>
+                                <% }); %>
+                            </ul>
+                        </div>
+                        <% } %>
+    
+
+                    <!-- Remaining HTML content for signup form -->
+                    <form id="signup-form" action="/signup" method="POST">
+                        <div class="form-group">
+                            <label for="username">Username</label>
+                            <input type="text" class="form-control underlined" name="username" id="username" placeholder="Enter username" required="">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="email">Email</label>
+                            <input type="email" class="form-control underlined" name="email" id="email" placeholder="Enter email address" required="">
+                        </div>
+
+                        <div class="form-group">
+                            <div class="row">
+                                <div class="col">
+                                    <label for="phone">Phone</label>
+                                    <input type="text" class="form-control underlined" name="phone" id="phone" placeholder="Enter phone number" required="">
+                                </div>
+                                <div class="col">
+                                    <label for="otp">Enter OTP</label>
+                                    <input type="text" class="form-control underlined" name="otp" id="otp" placeholder="Enter OTP" required="">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <button type="button" class="btn btn-block btn-primary" id="send-otp">Send OTP via SMS</button>
+                            <p id="otp-timer" class="text-muted text-center" style="display: none;">OTP will expire in <span id="timer">30</span> seconds</p>
+                        </div>
+
+                        <div class="form-group row">
+                            <div class="col">
+                                <label for="password">Password</label>
+                                <input type="password" class="form-control underlined" name="password" id="password" placeholder="Enter password" required="">
+                            </div>
+                            <div class="col">
+                                <label for="confirm_password">Confirm Password</label>
+                                <input type="password" class="form-control underlined" name="confirm_password" id="confirm_password" placeholder="Confirm password" required="">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-block btn-primary">Sign Up</button>
+                        </div>
+
+                        <div class="form-group">
+                            <p class="text-muted text-center">Already have an account? <a href="/login">Login!</a></p>
+                        </div>
+                    </form>
+
+                    <!-- Add a button for signing in with Google -->
+                    <div class="text-center">
+                        <div class="g-signin2" data-onsuccess="onSignIn">VVV</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="ref" id="ref">
+        <div class="color-primary"></div>
+        <div class="chart">
+            <div class="color-primary"></div>
+            <div class="color-secondary"></div>
+        </div>
+    </div>
+    <script>
+        // Google Sign-In callback function
+        function onSignIn(googleUser) {
+            // Retrieve user information from Google Sign-In instance
+            var profile = googleUser.getBasicProfile();
+            var idToken = googleUser.getAuthResponse().id_token;
+
+            // Send idToken to backend for verification and further processing
+            // Example: sendToBackend(idToken);
+            console.log("ID Token:", idToken);
+        }
+
+        document.getElementById('send-otp').addEventListener('click', async function () {
+            this.disabled = true; // Disable the button to prevent multiple clicks
+
+            const formData = {
+                username: document.getElementById('username').value,
+                email: document.getElementById('email').value,
+                phone: document.getElementById('phone').value,
+            };
+
+            try {
+                const response = await fetch('/generateOTP', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to send OTP');
+                }
+
+                const data = await response.json();
+                console.log('Success:', data);
+
+                // Start OTP timer
+                startTimer(data.expiry);
+
+                // Display OTP timer
+                document.getElementById('otp-timer').style.display = 'block';
+            } catch (error) {
+                console.error('Error:', error);
+                // Handle error response from the backend
+            }
+        });
+
+        // OTP Timer Function
+        function startTimer(expiryTime) {
+            let timer = Math.floor((expiryTime - Date.now()) / 1000); // Convert milliseconds to seconds
+            const timerElement = document.getElementById('timer');
+            timerElement.textContent = timer;
+
+            const timerInterval = setInterval(function () {
+                timer--;
+                timerElement.textContent = timer;
+                if (timer <= 0) {
+                    clearInterval(timerInterval);
+                    document.getElementById('send-otp').textContent = "Send OTP via SMS";
+                    document.getElementById('send-otp').disabled = false;
+                    document.getElementById('otp-timer').style.display = 'none';
+                }
+            }, 1000);
+        }
+    </script>
+</body>
+
+</html>

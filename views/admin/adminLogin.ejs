@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>admi
+      
+    </title>
+    <style>
+        body {
+            background-image: url("../../static/img/wall\ admin.png");
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-size: cover; /* Add this line */
+            background-repeat: no-repeat; /* Optional: to prevent repeating the image */
+        }
+
+        .container {
+            text-align: center;
+        }
+
+        form {
+            background-color: #807171;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 300px;
+            margin: 0 auto;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        input {
+            width: calc(100% - 16px);
+            padding: 8px;
+            margin-bottom: 16px;
+            box-sizing: border-box;
+        }
+
+        button {
+            background-color: #000000;
+            color: #ffffff;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+
+        header {
+            color: #ffffff;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+        #userButton {
+            background-color: #0056b3;
+            color: #ffffff;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            position: fixed;
+            top: 10px;
+            right: 10px;
+        }
+
+        .signup-text {
+            color: #ffffff;
+            font-weight: bold;
+            display: inline-block;
+            margin-top: 10px;
+            margin-right: 5px; /* Add some right margin for spacing */
+        }
+        .header-logo .logo img {
+    display: block;
+    margin: auto; /* Center both horizontally and vertically */
+    max-width: 60%;
+    max-height: 60%;
+}
+
+
+        a.signup-button {
+            text-decoration: none;
+            font-weight: bold;
+            color: #ffffff;
+            background-color: #0056b3;
+            padding: 10px 15px;
+            border-radius: 10px;
+            cursor: pointer;
+            display: inline-block;
+            margin-top: 10px;
+        }
+        #userButton:hover {
+            background-color: #00274d;}
+
+
+
+
+        a.signup-button:hover {
+            background-color: #00274d;
+        }
+    </style>
+</head>
+
+
+<body>
+    
+       <!-- <button id="userButton" onclick="redirectTouserLogin()">User Login</button> -->
+       
+      <form id="adminLoginForm" action="/admin" method="POST">
+
+            <div class="container">
+                <div class="header-logo">
+                <a href="/" class="logo">
+                    <img src="../../static/img/logo.png" alt=""><br>
+                </a>
+                <header><h1>Admin Login</h1></header>
+                
+            <label for="adminEmail">Email</label>
+            <input type="email" id="adminEmail" name="email" required />
+
+            <label for="adminPassword">Password</label>
+            <input type="password" id="adminPassword" name="password" required />
+
+            <button type="submit">Login</button>
+        </form>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            console.log("adminLogin.ejs loaded");
+            const adminLoginForm = document.getElementById('adminLoginForm');
+            adminLoginForm.addEventListener('submit', async function (event) {
+                event.preventDefault();
+    
+                const enteredEmail = document.getElementById('adminEmail').value;
+                const enteredPassword = document.getElementById('adminPassword').value;
+    
+                    const response = await fetch('/admin/admin', {
+                       
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            email: enteredEmail,
+                            password: enteredPassword,
+                        }),
+                    });
+    
+                    const responseData = await response.json();                  
+                           
+                    if (response.ok) {
+                        console.log("ok");
+                        // Redirect to the dashboard upon successful login
+                        window.location.href = "/admin/dashboard";
+                    } else {
+                        // Display error message
+                        alert(responseData.message || "Invalid credentials");
+                    }
+                        });
+        });
+    
+        function redirectTouserLogin() {
+            window.location.href = "/";
+        }
+    </script>
+    
+</body>

@@ -1,0 +1,32 @@
+<%- include ("header.ejs") %>
+
+<div class="cart-dropdown">
+    <div class="cart-list">
+        <% cartItems.forEach(item => { %>
+            <div class="product-widget">
+                <div class="product-img">
+                    <img src="<%= item.image %>" alt="">
+                </div>
+                <div class="product-body">
+                    <h3 class="product-name"><a href="#"><%= item.name %></a></h3>
+                    <h4 class="product-price"><span class="qty"><%= item.quantity %>x</span>$<%= item.price %></h4>
+                </div>
+                <button class="delete"><i class="fa fa-close"></i></button>
+            </div>
+        <% }); %>
+    </div>
+    <div class="cart-summary">
+        <small><%= cartItems.length %> Item(s) selected</small>
+        <% let total = 0; %>
+        <% cartItems.forEach(item => { %>
+            <% total += (item.price * item.quantity); %>
+        <% }); %>
+        <h5>SUBTOTAL: $<%= total.toFixed(2) %></h5>
+    </div>
+    <div class="cart-btns">
+        <a href="#">View Cart</a>
+        <a href="#">Checkout  <i class="fa fa-arrow-circle-right"></i></a>
+    </div>
+</div>
+
+<%- include ("footer.ejs") %>

@@ -1,0 +1,229 @@
+<%- include ("adminHead.ejs") %>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+<style>
+    /* Adjust column width and height */
+    .item-col {
+        width: auto; /* Adjust width as needed */
+    }
+    .item-row {
+        height: auto; /* Adjust height as needed */
+    }
+    .item-title {
+        max-width: 100px; /* Adjust the maximum width of the name column */
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    .item-img img {
+        width: 100px; /* Adjust image width */
+        height: auto; /* Maintain aspect ratio */
+        display: block; /* Prevent inline spacing */
+        margin: auto; /* Center images */
+    }
+    /* Adjust the width of the photo column */
+    th.photos-column {
+        width: 200px; /* Adjust width as needed */
+    }
+
+    /* Add background color to the table */
+    .items-list-page {
+        background-color: #f9f9f9; /* Change background color as needed */
+        padding: 20px; /* Add padding around the content */
+        border-radius: 5px; /* Add rounded corners */
+    }
+
+    /* Style for table header */
+    .table thead th {
+        text-align: center; /* Align header text to the center */
+        vertical-align: middle; /* Align vertically */
+    }
+
+    /* Style for table body */
+    .table tbody td {
+        text-align: center; /* Align body text to the center */
+        vertical-align: middle; /* Align vertically */
+    }
+
+    /* Style for action buttons */
+    .action-button3, .action-button2 {
+        display: inline-block;
+        padding: 3px 8px; /* Adjust padding */
+        border-radius: 3px;
+        text-decoration: none;
+        margin-right: 5px; /* Adjust margin */
+        margin-bottom: 5px;
+        font-weight: bold;
+        font-size: 12px; /* Adjust font size */
+    }
+
+    /* Style for the unlist button */
+    .block-button {
+        background-color: #eb0808;
+        color: #fff; /* Change text color to white */
+    }
+
+    /* Style for the list button */
+    .unblock-button {
+        background-color: #0ebb08;
+        color: #fff; /* Change text color to white */
+    }
+</style>
+
+
+>
+
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
+<div class="sidebar-mobile-menu-handle" id="sidebar-mobile-menu-handle"></div>
+<div class="mobile-menu-handle"></div>
+<article class="content items-list-page">
+   <% if (successMessage) { %>
+    <div class="alert alert-success" role="alert">
+        <%= successMessage %>
+    </div>
+<% } %>
+
+<% if (errorMessage) { %>
+    <div class="alert alert-danger" role="alert">
+        <%= errorMessage %>
+    </div>
+<% } %>
+
+    <div class="title-search-block">
+        <div class="title-block">
+            <div class="row">
+                <div class="col-md-6">
+                    <h3 class="title"> Items
+                        <a href="add-item" class="btn btn-primary btn-sm rounded-s"> Add New </a>
+                    </h3>
+                    <p class="title-description"> List of sample items - e.g.Laptop, mobiles, accessories, etc... </p>
+                </div>
+            </div>
+        </div>
+        <div class="items-search">
+            <form class="form-inline">
+                <div class="input-group">
+                    <input type="text" class="form-control boxed rounded-s" placeholder="Search for...">
+                    <span class="input-group-btn">
+                        <button class="btn btn-secondary rounded-s" type="button">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </span>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="card items">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>
+                        <label class="item-check" id="select-all-items">
+                            <input type="checkbox" class="checkbox">
+                            <span></span>
+                        </label>
+                    </th>
+                    <!-- Adjusted width for the photo column -->
+                    <th class="photos-column">Photos</th>
+                    <th>Name</th>
+                    <th>Price</th>
+                    <th>Description</th>
+                    <th>Stock</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% Products.forEach(product => { %>
+                    <tr>
+                        <td>
+                            <label class="item-check">
+                                <input type="checkbox" class="checkbox">
+                                <span></span>
+                            </label>
+                        </td>
+                        <td class="item-img">
+                            <% if (product.image[0]) { %>
+                                <img src="/<%= product.image[0]%>" alt="Product Image">
+                            <% } %>
+                        </td>
+                        <td>
+                            <a href="item-editor/<%= product._id %>" class="item-title"><%= product.name %></a>
+                        </td>
+                        <td><%= product.price %></td>
+                        <td><%= product.description %></td>
+                        <td><%= product.totalstock %></td>
+                        <td><%= product.status ? 'Active' : 'Inactive' %></td>
+                        <td>
+                            <% if (product.status) { %>
+                                <a href="#" class="action-button3 block-button" data-toggle="modal" data-target="#confirmUnlist<%= product._id %>">Unlist</a>
+                            <% } else { %>
+                                <a href="#" class="action-button2 unblock-button" data-toggle="modal" data-target="#confirmList<%= product._id %>">List</a>
+                            <% } %>
+                        </td>
+                    </tr>
+
+                    <!-- Confirmation modal for unlisting product -->
+                    <div class="modal fade" id="confirmUnlist<%= product._id %>" tabindex="-1" role="dialog" aria-labelledby="confirmUnlistLabel" aria-hidden="true">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="confirmUnlistLabel">Confirm Unlist</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    Are you sure you want to unlist this item?
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                                    <a href="/admin/unlist-product/<%= product._id %>" class="btn btn-primary">Unlist</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Confirmation modal for listing product -->
+                    <div class="modal fade" id="confirmList<%= product._id %>" tabindex="-1" role="dialog" aria-labelledby="confirmListLabel" aria-hidden="true">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="confirmListLabel">Confirm List</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    Are you sure you want to list this item?
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                                    <a href="/admin/list-product/<%= product._id %>" class="btn btn-primary">List</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                <% }); %>
+            </tbody>
+        </table>
+    </div>
+    <!-- Pagination and other HTML content -->
+</article>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // Add event listener to the file input
+        document.getElementById("image-input").addEventListener("change", function(event) {
+            const selectedPhotosContainer = document.getElementById("selected-photos");
+            selectedPhotosContainer.innerHTML = ""; // Clear previous selected photos
+    
+            // Loop through selected files and display their names
+            Array.from(event.target.files).forEach(function(file) {
+                const p = document.createElement("p");
+                p.textContent = file.name;
+                selectedPhotosContainer.appendChild(p);
+            });
+        });
+    });
+</script>
+<%- include ("adminFooter.ejs") %>
