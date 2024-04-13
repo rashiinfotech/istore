@@ -1,0 +1,88 @@
+<%- include("adminHead.ejs") %>
+
+<body>
+    <div class="container-user">
+        <h2>User Management</h2>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Serial No</th>
+                    <th>User Name</th>
+                    <th>Phone Number</th>
+                    <th>Email</th>
+                    <th>Role</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% users.forEach((user, index) => { %>
+                    <tr>
+                        <td><%= index + 1 %></td>
+                        <td><%= user.username %></td>
+                        <td><%= user.phone %></td>
+                        <td><%= user.email %></td>
+                        <td><%= user.isAdmin ? "Admin" : "User" %></td>
+                        <td><%= user.blocked ? "Blocked" : "Unblocked" %></td>
+                        <td>
+                            <% if (user.blocked) { %>
+                                <a href="#" class="action-button2 unblock-button" data-toggle="modal" data-target="#confirmUnblock<%= user._id %>">Unblock</a>
+                            <% } else { %>
+                                <a href="#" class="action-button3 block-button" data-toggle="modal" data-target="#confirmBlock<%= user._id %>">Block</a>
+                            <% } %>
+                        </td>
+                    </tr>
+                    
+                    <!-- Confirmation modal for unblocking -->
+                    <div class="modal fade" id="confirmUnblock<%= user._id %>" tabindex="-1" role="dialog" aria-labelledby="confirmUnblockLabel" aria-hidden="true">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="confirmUnblockLabel">Confirm Unblock</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    Are you sure you want to unblock this user?
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                                    <a href="/admin/unblock/<%= user._id %>" class="btn btn-primary">Unblock</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Confirmation modal for blocking -->
+                    <div class="modal fade" id="confirmBlock<%= user._id %>" tabindex="-1" role="dialog" aria-labelledby="confirmBlockLabel" aria-hidden="true">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="confirmBlockLabel">Confirm Block</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    Are you sure you want to block this user?
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                                    <a href="/admin/block/<%= user._id %>" class="btn btn-danger">Block</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                <% }); %>
+            </tbody>
+        </table>
+
+        <!-- Add User link -->
+        <a href="/admin/add-user" class="action-button2 add-user-button">Add User</a>
+        <br>
+    </div>
+</body>
+
+<%- include("adminFooter.ejs") %>

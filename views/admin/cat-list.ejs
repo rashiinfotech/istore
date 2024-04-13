@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <!-- Include necessary CSS and JavaScript files -->
+    <%- include("adminHead.ejs") %>
+</head>
+
+<body>
+    <div class="container-user">
+        <% if (success) { %>
+            <div class="alert alert-success" role="alert">
+                <%= message %>
+            </div>
+        <% } %>
+        <h2>Categories Management</h2>
+        <table class="table text-center">
+            <thead>
+                <tr>
+                    <th class="text-center">Serial No</th>
+                    <th class="text-center">Category Name</th>
+                    <th class="text-center">Description</th>
+                    <th class="text-center">Discount</th>
+                    <th class="text-center">Status</th>
+                    <th class="text-center">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% categories.forEach((category, index) => { %>
+                    <tr>
+                        <td class="text-center"><%= index + 1 %></td>
+                        <td class="text-center"><%= category.name %></td>
+                        <td class="text-center"><%= category.description %></td>
+                        <td class="text-center"><%= category.discount %></td>
+                        <td class="text-center"><%= category.status ? "Active" : "Inactive" %></td>
+                        <td class="text-center">
+                            <% if (category.status) { %>
+                                <a href="#" class="action-button3 block-button" data-toggle="modal" data-target="#confirmBlock<%= category._id %>">Block</a>
+                            <% } else { %>
+                                <a href="#" class="action-button2 unblock-button" data-toggle="modal" data-target="#confirmUnblock<%= category._id %>">Unblock</a>
+                            <% } %>
+                            <a href="/admin/edit-cat/<%= category._id %>" class="action-button2 block-button">Edit</a>
+                            <a href="/admin/delete-cat/<%= category._id %>" class="action-button2 block-button" data-toggle="modal" data-target="#confirmDelete<%= category._id %>">Delete</a>
+                        </td>
+                    </tr>
+
+                    <!-- Confirmation modal for unblocking category -->
+                    <div class="modal fade" id="confirmUnblock<%= category._id %>" tabindex="-1" role="dialog" aria-labelledby="confirmUnblockLabel" aria-hidden="true">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="confirmUnblockLabel">Confirm Unblock</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    Are you sure you want to unblock this category?
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                                    <a href="/admin/unblock-cat/<%= category._id %>" class="btn btn-primary">Unblock</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Confirmation modal for blocking category -->
+                    <div class="modal fade" id="confirmBlock<%= category._id %>" tabindex="-1" role="dialog" aria-labelledby="confirmBlockLabel" aria-hidden="true">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="confirmBlockLabel">Confirm Block</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    Are you sure you want to block this category?
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                                    <a href="/admin/block-cat/<%= category._id %>" class="btn btn-danger">Block</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Confirmation modal for deleting category -->
+                    <div class="modal fade" id="confirmDelete<%= category._id %>" tabindex="-1" role="dialog" aria-labelledby="confirmDeleteLabel" aria-hidden="true">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="confirmDeleteLabel">Confirm Delete</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    Are you sure you want to delete this category?
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                                    <a href="/admin/delete-cat/<%= category._id %>" class="btn btn-danger">Delete</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                <% }); %>
+            </tbody>
+        </table>
+
+        <!-- Add category link -->
+        <a href="/admin/add-cat" class="action-button2 add-user-button">Add Category</a>
+        <br>
+    </div>
+
+    <!-- Include necessary JavaScript files -->
+    <%- include("adminFooter.ejs") %>
+    
+    <!-- Bootstrap and jQuery scripts should be included here if not already included -->
+
+</body>
+
+</html>

@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Home Page</title>
+
+    <!-- Google font -->
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:400,500,700" rel="stylesheet">
+
+    <!-- Bootstrap -->
+    <link type="text/css" rel="stylesheet" href="../../static/css/bootstrap.min.css"/>
+
+    <!-- Slick -->
+    <link type="text/css" rel="stylesheet" href="../../static/css/slick.css">
+    <link type="text/css" rel="stylesheet" href="../../static/css/slick-theme.css"/>
+
+    <!-- nouislider -->
+    <link type="text/css" rel="stylesheet" href="../../static/css/nouislider.min.css"/>
+
+    <!-- Font Awesome Icon -->
+    <link rel="stylesheet" href="../../static/css/font-awesome.min.css">
+
+    <!-- Custom stlylesheet -->
+    <link type="text/css" rel="stylesheet" href="../../static/css/style.css"/>
+
+    <!-- Additional Styles -->
+    <style>
+        /* Default text color */
+        .dropdown-item-user a {
+            color: black; /* Set default text color to black */
+            text-decoration: none; /* Remove underline */
+        }
+
+        /* Change text color to red on hover */
+        .dropdown-item-user a:hover {
+            color: red; /* Change text color to red on hover */
+        }
+
+        /* Change background color of dropdown menu */
+        .dropdown-menu {
+            background-color: #6e99c4; /* Light gray background color */
+            border: none; /* Remove border */
+            border-radius: 5px; /* Add border-radius */
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Add box-shadow */
+            padding: 10px; /* Add padding */
+        }
+
+        /* Style for welcome message */
+        .welcome-message {
+            font-weight: bold;
+            padding: 0 0; /* Reduced padding */
+            margin-bottom: 0px; /* Added margin-bottom */
+        }
+
+        /* Style for user details */
+        .user-details {
+            padding: 0px;
+        }
+
+        /* Style for login/signup box */
+        .login-signup-box {
+            padding: 5px;
+        }
+
+        /* Style for menu items */
+        .dropdown-item-user {
+            display: block;
+            padding: 15px 0; /* Increased gap between items */
+        }
+
+        /* Style for profile dropdown toggle */
+        .profile-dropdown-toggle {
+            color: white; /* Set text color */
+            cursor: pointer; /* Change cursor to pointer */
+            display: flex; /* Use flexbox for alignment */
+            align-items: center; /* Align items vertically */
+			margin-right: 	55px;
+        }
+
+
+        .profile-dropdown-toggle .fa {
+            margin-right: 	5px; /* Add margin between icon and text */
+        }
+
+        /* Style for profile dropdown menu */
+        .profile-dropdown-menu {
+            position: absolute; /* Position menu absolutely */
+            top: 100%; /* Align menu below toggle */
+            right: 10px; /* Align menu to the right */
+            min-width: 200px; /* Set minimum width */
+            z-index: 999; /* Ensure menu appears above other content */
+		    margin-right: 	55px;
+        }
+
+        /* Style for login/signup button */
+        .login-signup-button {
+            margin-top: 5px; /* Reduced margin-top */
+            text-align: center; /* Align button text to the center */
+        }
+
+        .login-signup-button button {
+            padding: 5px 15px; /* Add padding to the button */
+            background-color: #6e99c4; /* Background color same as menu */
+            color: #fff; /* White text color */
+            border: none; /* Remove button border */
+            border-radius: 5px; /* Add border radius */
+            cursor: pointer; /* Change cursor to pointer */
+        }
+
+        .login-signup-button button:hover {
+            background-color: #567a9e; /* Darker background color on hover */
+        }
+    </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+    <div id="top-header">
+        <div class="container">
+            <ul class="header-links pull-left">
+                <li><a href="#"><i class="fa fa-phone"></i> +91 9544 2222 68</a></li>
+                <li><a href="#"><i class="fa fa-envelope-o"></i> infostore@gmail.com</a></li>
+                <li><a href="#"><i class="fa fa-map-marker"></i> Perinthalmanna</a></li>
+            </ul>
+            <!-- Account Menu -->
+            <ul class="header-links pull-right">
+                <li class="profile dropdown">
+                    <div class="profile-dropdown-toggle">
+                        <i class="fa fa-user-o"></i> My Account <i class="fa fa-angle-down"></i>
+                    </div>
+                    <div class="dropdown-menu profile-dropdown-menu">
+                        <!-- Welcome message for signed-in users -->
+                        <div id="welcome-message" class="dropdown-item welcome-message">
+                            <span id="user-welcome"></span>
+                            <% if (isAuthenticated && user && user.username) { %>
+                            <%= user.username %>
+                               
+                            <% } else { %>
+                               
+                                    Guest
+                               
+                            <% } %>
+                            
+                            
+                              
+                            
+                             <span id="user-name"></span>
+                        </div>
+                        <!-- Login/signup box for non-signed-in users -->
+                        <div id="login-signup-box" class="dropdown-item login-signup-box">
+                            To access your account and manage orders.
+                            <div class="login-signup-button">
+                                <button><a href="/login"><i class="fa fa-login"></i> Login/Signup</a></button>
+                            </div>
+                        </div>
+                        <!-- User details for signed-in users -->
+                        <div id="user-details" class="dropdown-item user-details">
+                            <strong><a href="/edit-profile"><i class="fa fa-user"></i> Edit Profile</a></strong><br>
+                            <strong><a href="/orders"><i class="fa fa-list"></i> Orders</a></strong><br>
+                            <strong><a href="/wishlist"><i class="fa fa-heart"></i> Wishlist</a></strong><br>
+                            <strong><a href="/contact-us"><i class="fa fa-envelope"></i> Contact Us</a></strong><br>
+                            <strong><a href="/gift-cards"><i class="fa fa-gift"></i> Gift Cards</a></strong><br>
+                            <strong><a href="/logout"><i class="fa fa-power-off"></i> Logout</a></strong>
+                        </div>
+                    </div>
+                </li>
+            </ul>
+            <!-- /Account Menu -->
+        </div>
+    </div>
+
+    <div id="header">
+        <div class="container">
+            <div class="row">
+                <!-- LOGO -->
+                <div class="col-md-3">
+                    <div class="header-logo">
+                        <a href="/" class="logo">
+                            <img src="../../static/img/logo.png" alt="">
+                        </a>
+                    </div>
+                </div>
+                <!-- /LOGO -->
+
+                <!-- SEARCH BAR -->
+                <div class="col-md-6">
+                    <div class="header-search">
+                        <form>
+                            <select class="input-select" name="category">
+                                <option value="0">All Categories</option>
+                                <% categories.forEach(category => { %>
+                                    <option value="<%= category._id %>"><%= category.name %></option>
+                                <% }); %>
+                            </select>
+                            <input class="input" placeholder="Search here" name="search">
+                            <button class="search-btn">Search</button>
+                        </form>
+                    </div>
+                </div>
+                
+						<!-- /SEARCH BAR -->
+
+
+                <!-- Wishlist and Cart -->
+                <div class="col-md-3 clearfix">
+                    <div class="header-ctn">
+                        <!-- Wishlist -->
+                        <div>
+                            <a href="#">
+                                <i class="fa fa-heart-o"></i>
+                                <span>Your Wishlist</span>
+                                <div class="qty">2</div>
+                            </a>
+                        </div>
+                        <!-- /Wishlist -->
+
+                        <!-- Cart -->
+                      <!-- Cart -->
+								<div class="dropdown">
+									<a class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true">
+										<i class="fa fa-shopping-cart"></i>
+										<span>Your Cart</span>
+										<div class="qty">3</div>
+									</a>
+									<div class="cart-dropdown">
+										<div class="cart-list">
+											<div class="product-widget">
+												<div class="product-img">
+													<img src="./img/product01.png" alt="">
+												</div>
+												<div class="product-body">
+													<h3 class="product-name"><a href="#">product name goes here</a></h3>
+													<h4 class="product-price"><span class="qty">1x</span>$980.00</h4>
+												</div>
+												<button class="delete"><i class="fa fa-close"></i></button>
+											</div>
+
+											<div class="product-widget">
+												<div class="product-img">
+													<img src="./img/product02.png" alt="">
+												</div>
+												<div class="product-body">
+													<h3 class="product-name"><a href="#">product name goes here</a></h3>
+													<h4 class="product-price"><span class="qty">3x</span>$980.00</h4>
+												</div>
+												<button class="delete"><i class="fa fa-close"></i></button>
+											</div>
+										</div>
+										<div class="cart-summary">
+											<small>3 Item(s) selected</small>
+											<h5>SUBTOTAL: $2940.00</h5>
+										</div>
+										<div class="cart-btns">
+											<a href="#">View Cart</a>
+											<a href="#">Checkout  <i class="fa fa-arrow-circle-right"></i></a>
+										</div>
+									</div>
+								</div>
+								<!-- /Cart -->
+
+                <!-- /Wishlist and Cart -->
+            </div>
+        </div>
+    </div>
+
+<div class="cart-dropdown">
+    <div class="cart-list">
+        <div class="product-widget">
+            <div class="product-img">
+                <img src="../../static/img//product01.png" alt="">
+            </div>
+            <div class="product-body">
+                <h3 class="product-name"><a href="#">product name goes here</a></h3>
+                <h4 class="product-price"><span class="qty">1x</span>$980.00</h4>
+            </div>
+            <button class="delete"><i class="fa fa-close"></i></button>
+        </div>
+
+        <div class="product-widget">
+            <div class="product-img">
+                <img src="../../static/img//product02.png" alt="">
+            </div>
+            <div class="product-body">
+                <h3 class="product-name"><a href="#">product name goes here</a></h3>
+                <h4 class="product-price"><span class="qty">3x</span>$980.00</h4>
+            </div>
+            <button class="delete"><i class="fa fa-close"></i></button>
+        </div>
+    </div>
+    <div class="cart-summary">
+        <small>3 Item(s) selected</small>
+        <h5>SUBTOTAL: $2940.00</h5>
+    </div>
+    <div class="cart-btns">
+        <a href="#">View Cart</a>
+        <a href="#">Checkout  <i class="fa fa-arrow-circle-right"></i></a>
+    </div>
+</div>
+</div>
+<!-- /Cart -->
+</header>
+
+<!-- JavaScript code -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const accountToggle = document.querySelector('.profile .profile-dropdown-toggle');
+        const accountMenu = document.querySelector('.profile-dropdown-menu');
+        const welcomeMessage = document.getElementById('welcome-message');
+        const userDetails = document.getElementById('user-details');
+        const loginSignupBox = document.getElementById('login-signup-box');
+        const userName = document.getElementById('user-name');
+        const userWelcome = document.getElementById('user-welcome');
+
+        // Toggle account menu when clicking the "My Account" link
+        accountToggle.addEventListener('click', function(event) {
+            event.preventDefault(); // Prevent the link from following its href
+            accountMenu.classList.toggle('show');
+        });
+
+        // Hide account menu when clicking outside the menu
+        document.addEventListener('click', function(event) {
+            if (!accountToggle.contains(event.target) && !accountMenu.contains(event.target)) {
+                accountMenu.classList.remove('show');
+            }
+        });
+
+        // Check if the user is signed in
+        const isAuthenticated = <%= isAuthenticated %>; // Retrieve isAuthenticated value passed from server-side
+        
+        if (isAuthenticated) {
+            // If user is signed in, display welcome message and user details
+            welcomeMessage.style.display = 'block';
+            userDetails.style.display = 'block';
+            loginSignupBox.style.display = 'none'; // Assuming you want to hide login/signup box when user is signed in
+           
+            userWelcome.textContent = 'Welcome,'; // Change the welcome text as needed
+        } else {
+            // If user is not signed in, display login/signup box
+            welcomeMessage.style.display = 'none';
+           
+            userDetails.style.display = 'none';
+            loginSignupBox.style.display = 'block';
+        }
+    });
+</script>
+
+
+</body>
+</html> 

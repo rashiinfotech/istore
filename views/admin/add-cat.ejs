@@ -1,0 +1,54 @@
+<%- include ("adminHead.ejs") %>
+
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
+<div class="sidebar-mobile-menu-handle" id="sidebar-mobile-menu-handle"></div>
+<div class="mobile-menu-handle"></div>
+<article class="content item-editor-page">
+    <div class="title-block">
+        <h3 class="title"> Add new Category
+            <span class="sparkline bar" data-type="bar"></span>
+        </h3>
+    </div>
+    
+    <div class="container">
+        <% if (success === 'true') { %>
+            <div class="alert alert-success" role="alert">
+                <%= message %>
+            </div>
+        <% } else if (error === 'true') { %>
+            <div class="alert alert-danger" role="alert">
+                <%= message %>
+            </div>
+        <% } %>
+        </div>
+    <form name="item" action="/admin/submit-category" method="POST">
+        <div class="card card-block">
+            <div class="form-group row">
+                <label class="col-sm-2 form-control-label text-xs-right"> Category Name: </label>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control boxed" placeholder="Enter category name" name="name">
+                </div>
+            </div>
+            <div class="form-group row">
+                <label class="col-sm-2 form-control-label text-xs-right"> Description: </label>
+                <div class="col-sm-10">
+                    <textarea class="form-control boxed" placeholder="Enter category description" name="description"></textarea>
+                </div>
+            </div>
+            <div class="form-group row">
+                <label class="col-sm-2 form-control-label text-xs-right"> Discount: </label>
+                <div class="col-sm-10">
+                    <input type="number" class="form-control boxed" placeholder="Enter discount percentage" name="discount">
+                </div>
+            </div>
+        </div>
+        <!-- Submit Button inside the same div -->
+        <div class="form-group row">
+            <div class="col-sm-10 col-sm-offset-2">
+                <button type="submit" class="btn btn-primary"> Submit </button>
+            </div>
+        </div>
+    </form>
+</article>
+
+<%- include ("adminFooter.ejs") %>

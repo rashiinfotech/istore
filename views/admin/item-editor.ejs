@@ -1,0 +1,157 @@
+<%- include ("adminHead.ejs") %>
+
+    <div class="sidebar-overlay" id="sidebar-overlay"></div>
+    <div class="sidebar-mobile-menu-handle" id="sidebar-mobile-menu-handle"></div>
+    <div class="mobile-menu-handle"></div>
+    <article class="content item-editor-page">
+        <div class="title-block">
+            <h3 class="title"> Edit item
+                <span class="sparkline bar" data-type="bar"></span>
+            </h3>
+        </div>
+        <form name="item" action="/admin/update-product/<%= product._id %>" method="POST" enctype="multipart/form-data">
+
+            <% if (successMessage) { %>
+                <div class="alert alert-success" role="alert">
+                    <%= successMessage %>
+                </div>
+                <% } else if (errorMessage) { %>
+                    <div class="alert alert-danger" role="alert">
+                        <%= errorMessage %>
+                    </div>
+                    <% } %>
+                        <div class="card card-block">
+                            <div class="form-group row">
+                                <label class="col-sm-2 form-control-label text-xs-right"> Name: </label>
+                                <div class="col-sm-10">
+                                    <input type="text" class="form-control boxed" name="name" placeholder=""
+                                        value="<%= product.name %>">
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-sm-2 form-control-label text-xs-right"> Category: </label>
+                                <div class="col-sm-10">
+                                    <select class="c-select form-control boxed" name="category">
+                                        <option value="<%= product.category %>">
+                                            <%= categoryName %>
+                                        </option>
+                                        <% categories.forEach(category=> { %>
+                                            <% if (category._id.toString() !==product.category.toString()) { %>
+                                                <option value="<%= category._id %>">
+                                                    <%= category.name %>
+                                                </option>
+                                                <% } %>
+                                                    <% }); %>
+                                    </select>
+                                </div>
+                            </div>
+
+
+                            <div class="form-group row">
+                                <label class="col-sm-2 form-control-label text-xs-right"> Price: </label>
+                                <div class="col-sm-10">
+                                    <input type="text" class="form-control boxed" name="price" placeholder=""
+                                        value="<%= product.price %>">
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-sm-2 form-control-label text-xs-right"> Description: </label>
+                                <div class="col-sm-10">
+                                    <input type="text" class="form-control boxed" name="description" placeholder=""
+                                        value="<%= product.description %>">
+                                </div>
+                            </div>
+
+                           <!-- Include Stock Column -->
+            <div class="form-group row">
+                <label class="col-sm-2 form-control-label text-xs-right"> Stock: </label>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control boxed" name="stock" placeholder="Quantity"
+                        value="<%= product.stock %>">
+                </div>
+            </div>
+
+            <!-- Image Upload -->
+            <div class="form-group row">
+                <label class="col-sm-2 form-control-label text-xs-right"> Images: </label>
+                <div class="col-sm-10">
+                    <input type="file" name="image" id="image-input" multiple accept="image/*">
+                </div>
+            </div>
+
+            <!-- Display selected photos -->
+            <!-- Display selected photos -->
+<div id="selected-photos" class="row">
+    <% product.image.forEach((image, index) => { %>
+       
+    <div class="col-md-3">
+        <img src="/<%= image %>" alt="Product image" class="img-thumbnail" width="100">
+        <button type="button" class="btn btn-danger btn-sm mt-2 delete-image" data-index="<%= index %>">
+            Delete
+        </button>
+        <!-- <input type="hidden" id="deleted-images-input" name="deletedImages" value="[]"> -->
+    </div>
+    <% }); %>
+</div>
+
+
+            <div class="form-group row">
+                <div class="col-sm-10 col-sm-offset-2">
+                    <button type="submit" class="btn btn-primary"> Update </button>
+                </div>
+            </div>
+        </div>
+    </form>
+</article>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        // Function to handle image preview
+        function handleImagePreview() {
+            const selectedPhotosContainer = document.getElementById("selected-photos");
+            selectedPhotosContainer.innerHTML = ""; // Clear previous selected photos
+
+            // Loop through selected files and display them as images
+            Array.from(document.getElementById("image-input").files).forEach(function (file) {
+                const img = document.createElement("img");
+                img.src = URL.createObjectURL(file);
+                img.alt = "Uploaded Photo";
+                img.width = 100; // Adjust the width here to control the size of the thumbnails
+                img.classList.add("img-thumbnail", "mr-2", "mb-2");
+                selectedPhotosContainer.appendChild(img);
+            });
+        }
+
+        // Add event listener to the file input
+        document.getElementById("image-input").addEventListener("change", function (event) {
+            handleImagePreview();
+        });
+
+        // Add event listener to delete image buttons
+        const deleteButtons = document.querySelectorAll(".delete-image");
+        deleteButtons.forEach(function (button) {
+            button.addEventListener("click", function () {
+                const index = button.getAttribute("data-index");
+                const selectedPhotosContainer = document.getElementById("selected-photos");
+                selectedPhotosContainer.removeChild(selectedPhotosContainer.children[index]);
+
+                // Update file input value to remove the deleted image
+                const fileInput = document.getElementById("image-input");
+                const files = Array.from(fileInput.files);
+                const deletedFile = files.splice(index, 1)[0]; // Remove the deleted image file
+                fileInput.files = new FileList({ items: files });
+
+                // Keep track of deleted images
+                const deletedImagesInput = document.getElementById("deleted-images-input");
+                const deletedImages = JSON.parse(deletedImagesInput.value);
+                deletedImages.push(deletedFile);
+                deletedImagesInput.value = JSON.stringify(deletedImages);
+            });
+        });
+    });
+</script>
+
+
+
+
+<%- include ("adminFooter.ejs") %>
