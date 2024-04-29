@@ -143,6 +143,7 @@ const addItem = async (req, res) => {
   const message = req.query.message || '';
   const error = req.query.error || false;
   const photos = [];
+  req.session.typedFields = req.session.typedFields || {};
   
   try {
       if (req.session.user && req.session.user.isAdmin) {
@@ -152,7 +153,7 @@ const addItem = async (req, res) => {
           // Pass successMessage and errorMessage to the template
           const successMessage = success ? message : '';
           const errorMessage = error ? message : '';
-          res.render('admin/add-item', { user: req.session.user, categories, successMessage, errorMessage ,photos});
+          res.render('admin/add-item', { user: req.session.user, categories, successMessage, errorMessage ,photos, typedFields: req.session.typedFields});
       } else {
           res.render('admin/adminLogin');
       }

@@ -69,9 +69,6 @@
     }
 </style>
 
-
->
-
 <div class="sidebar-overlay" id="sidebar-overlay"></div>
 <div class="sidebar-mobile-menu-handle" id="sidebar-mobile-menu-handle"></div>
 <div class="mobile-menu-handle"></div>
@@ -210,20 +207,70 @@
     </div>
     <!-- Pagination and other HTML content -->
 </article>
+<%- include ("adminFooter.ejs") %>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
 <script>
-    document.addEventListener("DOMContentLoaded", function() {
-        // Add event listener to the file input
-        document.getElementById("image-input").addEventListener("change", function(event) {
+    document.addEventListener("DOMContentLoaded", function () {
+        // Function to handle image preview
+        function handleImagePreview() {
             const selectedPhotosContainer = document.getElementById("selected-photos");
             selectedPhotosContainer.innerHTML = ""; // Clear previous selected photos
-    
-            // Loop through selected files and display their names
-            Array.from(event.target.files).forEach(function(file) {
-                const p = document.createElement("p");
-                p.textContent = file.name;
-                selectedPhotosContainer.appendChild(p);
+
+            // Loop through selected files and display them as images
+            Array.from(document.getElementById("image-input").files).forEach(function (file) {
+                const img = document.createElement("img");
+                img.src = URL.createObjectURL(file);
+                img.alt = "Uploaded Photo";
+                img.width = 100; // Adjust the width here to control the size of the thumbnails
+                img.classList.add("img-thumbnail", "mr-2", "mb-2");
+                selectedPhotosContainer.appendChild(img);
+            });
+        }
+
+        // Add event listener to the file input
+        document.getElementById("image-input").addEventListener("change", function (event) {
+            handleImagePreview();
+        });
+
+        // Add event listener to delete image buttons
+        const deleteButtons = document.querySelectorAll(".delete-image");
+        deleteButtons.forEach(function (button) {
+            button.addEventListener("click", function () {
+                // Show Bootstrap modal for confirmation
+                $('#confirm-modal').modal('show');
+
+                // Get the index and image ID
+                const index = button.getAttribute("data-index");
+                const imageId = button.getAttribute("data-image-id");
+
+                // Function to handle deletion upon confirmation
+                document.getElementById("confirm-delete").addEventListener("click", function () {
+                    // Remove the image preview
+                    const selectedPhotosContainer = document.getElementById("selected-photos");
+                    selectedPhotosContainer.removeChild(selectedPhotosContainer.children[index]);
+
+                    // Send an AJAX request to delete the image
+                    const xhr = new XMLHttpRequest();
+                    xhr.open("DELETE", "/admin/delete-image/" + imageId);
+                    xhr.setRequestHeader("Content-Type", "application/json");
+                    xhr.onreadystatechange = function () {
+                        if (xhr.readyState === XMLHttpRequest.DONE) {
+                            if (xhr.status === 200) {
+                                // Image deleted successfully, handle UI changes if needed
+                            } else {
+                                // Handle error
+                                console.error("Error deleting image:", xhr.responseText);
+                            }
+                        }
+                    };
+                    xhr.send();
+
+                    // Hide the modal
+                    $('#confirm-modal').modal('hide');
+                });
             });
         });
     });
 </script>
-<%- include ("adminFooter.ejs") %>

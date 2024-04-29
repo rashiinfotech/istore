@@ -1083,6 +1083,12 @@ textarea.input {
 .product-widget {
   position: relative;
 }
+.sold-out {
+  background-color: red;
+  color: white;
+  padding: 5px 10px;
+  border-radius: 5px;
+}
 
 .product-widget+.product-widget {
   margin: 30px 0px;
@@ -1093,10 +1099,12 @@ textarea.input {
   left: 0px;
   top: 0px;
   width: 60px;
+  
 }
 
 .product-widget .product-img>img {
   width: 100%;
+  margin-top: 50px;
 }
 
 .product-widget .product-body {

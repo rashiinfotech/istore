@@ -1,0 +1,78 @@
+<%- include ('header.ejs') %>
+
+<!-- MAIN CONTENT -->
+<div class="container" class="row justify-content-center" >
+    <div class="edit-profile">
+        <h1>User Profile</h1>
+        <div class="user-details">
+            <div class="profile-picture">
+                <!-- Add user profile picture here -->
+                <!-- <img src="user_profile_picture.jpg" alt="Profile Picture"> -->
+            </div>
+            <div class="profile-info">
+                <p><strong>Username:</strong> <%= user.username %></p>
+                <p><strong>Email:</strong> <%= user.email %></p>
+                <p><strong>Mobile:</strong> <%= user.phone %></p>
+                <p><strong>Primary Address:</strong> <%= user.address %></p>
+                <!-- Include other profile details like name, address, etc. here -->
+            </div>
+        </div> </div>
+  <!-- address secion -->
+  <div class="profile-box p-4 mb-4">
+    <h2 class="mb-4">Address</h2>
+    <div class="profile-address mb-4">
+      <% if (address.length > 0) { %> <% address.forEach((address) => { %>
+        <div class="card mb-3">
+          <div class="card-body">
+            <div class="row">
+              <div class="col-md-6">
+                <p class="card-text"><strong>Address:</strong> <%= address.address %></p>
+                <p class="card-text"><strong>Street:</strong> <%= address.addressline2 %></p>
+                <p class="card-text"><strong>City:</strong> <%= address.city %></p>
+              </div>
+              <div class="col-md-6">
+                <p class="card-text"><strong>State:</strong> <%= address.state %></p>
+                <p class="card-text"><strong>Pincode:</strong> <%= address.pincode %></p>
+              </div>
+            </div>
+          </div>
+        </div>
+    </div>
+      <% }); %> <% } else { %>
+        <p>No address found. </p>
+      <% } %>
+   
+        
+
+        <!-- Navigation -->
+        <nav class="account-nav">
+            <ul class="list-unstyled">
+                <li class="mb-2">
+                    <a href="/edit-profile" class="btn btn-success w-100">Edit Profile</a> 
+                
+              
+                    <a href="/orders" class="btn btn-primary w-100">My Orders</a>
+                
+             
+                    <a href="/resetpassword" class="btn btn-warning w-100">Reset Password</a>
+                
+             
+                    <a href="/coupons" class="btn btn-info w-100">Coupons</a>
+              
+             
+                    <a href="/wallet" class="btn btn-success w-100">Wallet</a>
+            
+             
+                    <a href="/address" class="btn btn-warning w-100">Addresses</a>
+                
+                
+                    <a href="/logout" class="btn btn-danger w-100">Logout</a>
+                </li>
+                <!-- Add more navigation links -->
+           
+        </nav>
+    </div>
+</div>
+
+<!-- /MAIN CONTENT -->
+<%- include ("footer.ejs") %>

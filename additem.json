@@ -1,0 +1,829 @@
+<%- include ("adminHead.ejs") %>
+
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
+<div class="sidebar-mobile-menu-handle" id="sidebar-mobile-menu-handle"></div>
+<div class="mobile-menu-handle"></div>
+<article class="content item-editor-page">
+    <div class="title-block">
+        <h3 class="title">Add New Item</h3>
+    </div>
+    <form name="item" action="/admin/submitItems" method="POST" enctype="multipart/form-data" >
+        <% if (successMessage) { %>
+            <div class="alert alert-success" role="alert">
+                <%= successMessage %>
+            </div>
+        <% } else if (errorMessage) { %>
+            <div class="alert alert-danger" role="alert">
+                <%= errorMessage %>
+            </div>
+        <% } %>
+        <div class="card card-block">
+          <!-- Name -->
+<div class="form-group row">
+    <label class="col-sm-2 col-form-label">Name:</label>
+    <div class="col-sm-10">
+        <input type="text" class="form-control boxed" name="name" placeholder="Enter Product Name" value="<%= typedFields && typedFields.name ? typedFields.name : '' %>">
+        <% if (errorMessage && errorMessage.field === 'name') { %>
+            <div class="error-message"><%= errorMessage.message %></div>
+        <% } %>
+    </div>
+</div>
+<!-- Category -->
+<div class="form-group row">
+    <label class="col-sm-2 col-form-label">Category:</label>
+    <div class="col-sm-10">
+        <select class="form-control boxed" name="category">
+            <option selected disabled>Select Category</option>
+            <% categories.forEach(category => { %>
+            <option value="<%= category._id %>" <%= typedFields && typedFields.category === category._id ? 'selected' : '' %>><%= category.name %></option>
+            <% }); %>
+        </select>
+        <% if (errorMessage && errorMessage.field === 'category') { %>
+            <div class="error-message"><%= errorMessage.message %></div>
+        <% } %>
+    </div>
+</div>
+<!-- Price -->
+<div class="form-group row">
+    <label class="col-sm-2 col-form-label">Price:</label>
+    <div class="col-sm-10">
+        <input type="text" class="form-control boxed" name="price" placeholder="Enter Product Cost" value="<%= typedFields && typedFields.price ? typedFields.price : '' %>">
+        <% if (errorMessage && errorMessage.field === 'price') { %>
+            <div class="error-message"><%= errorMessage.message %></div>
+        <% } %>
+    </div>
+</div>
+<!-- Description -->
+<div class="form-group row">
+    <label class="col-sm-2 col-form-label">Description:</label>
+    <div class="col-sm-10">
+        <input type="text" class="form-control boxed" name="description" placeholder="Enter Product Description" value="<%= typedFields && typedFields.description ? typedFields.description : '' %>">
+        <% if (errorMessage && errorMessage.field === 'description') { %>
+            <div class="error-message"><%= errorMessage.message %></div>
+        <% } %>
+    </div>
+</div>
+<!-- Stock -->
+<div class="form-group row">
+    <label class="col-sm-2 col-form-label">Stock:</label>
+    <div class="col-sm-10">
+        <input type="text" class="form-control boxed" name="stock" placeholder="Enter Available Stock" value="<%= typedFields && typedFields.stock ? typedFields.stock : '' %>">
+        <% if (errorMessage && errorMessage.field === 'stock') { %>
+            <div class="error-message"><%= errorMessage.message %></div>
+        <% } %>
+    </div>
+</div>
+
+            <!-- Image Upload -->
+<!-- Image Upload -->
+<div class="form-group row">
+    <label class="col-sm-2 col-form-label">Images:</label>
+    <div class="col-sm-10">
+        <input type="file" name="image" id="image-input" multiple required accept="image/*">
+        <% if (typedFields && typedFields.images) { %>
+            <% typedFields.images.forEach(image => { %>
+                <img src="<%= image %>" alt="Uploaded Photo" width="100" class="col-sm-3">
+            <% }); %>
+        <% } %>
+    </div>
+</div>
+
+
+            <!-- Display selected photos -->
+            <div id="selected-photos" class="row"></div>
+            <div class="form-group row">
+                <div class="col-sm-10 offset-sm-2">
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                </div>
+            </div>
+        </div>
+    </form>
+</article>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // Add event listener to the file input
+        document.getElementById("image-input").addEventListener("change", function(event) {
+            const selectedPhotosContainer = document.getElementById("selected-photos");
+    
+            // Loop through selected files and display them as images
+            Array.from(event.target.files).forEach(function(file) {
+                const container = document.createElement("div");
+                container.classList.add("col-sm-3"); // Add Bootstrap column class
+    
+                const img = document.createElement("img");
+                img.src = URL.createObjectURL(file);
+                img.alt = "Uploaded Photo";
+                img.width = 100; // Adjust the width here to control the size of the thumbnails
+    
+                const closeButton = document.createElement("button");
+                closeButton.textContent = "Close";
+                closeButton.classList.add("btn", "btn-danger", "btn-sm", "mt-2");
+                closeButton.addEventListener("click", function() {
+                    container.remove(); // Remove the container when close button is clicked
+                });
+    
+                container.appendChild(img);
+                container.appendChild(closeButton);
+                selectedPhotosContainer.appendChild(container);
+            });
+        });
+    });
+    </script>
+    
+    
+
+<%- include ("adminFooter.ejs") %>
+
+
+
+
+const submitItems = async (req, res) => {
+    console.log("req.body", req.body); // Check if other form fields are being parsed correctly
+    console.log("req.file", req.file);
+
+    const { name, category, price, description, stock } = req.body;
+    const categories = await Category.find();
+    const filename = req.file ? req.file.filename : null; // Include filename check
+
+    // Reset the error message
+    req.session.errorMessage = null;
+
+    // Store typed fields in session for redirect
+    req.session.typedFields = { name, category, price, description, stock };
+
+    if (req.session.user && req.session.user.isAdmin) {
+        if (!name) {
+            req.session.errorMessage = 'Product name is required';
+            return res.render('admin/add-item', { 
+                categories, 
+                successMessage: null, 
+                user: req.session.user, 
+                errorMessage: req.session.errorMessage, 
+                typedFields: req.session.typedFields 
+            });
+        }
+    
+        // Check if category is provided
+        if (!category) {
+            req.session.errorMessage = 'Category is required';
+            return res.render('admin/add-item', { 
+                categories, 
+                successMessage: null, 
+                user: req.session.user, 
+                errorMessage: req.session.errorMessage, 
+                typedFields: req.session.typedFields 
+            });
+        }
+    
+        // Check if price is provided and is a valid number
+        if (!price || isNaN(price)) {
+            req.session.errorMessage = 'Valid price is required';
+            return res.render('admin/add-item', { 
+                categories, 
+                successMessage: null, 
+                user: req.session.user, 
+                errorMessage: req.session.errorMessage, 
+                typedFields: req.session.typedFields 
+            });
+        }
+    
+        // Check if description is provided
+        if (!description) {
+            req.session.errorMessage = 'Description is required';
+            return res.render('admin/add-item', { 
+                categories, 
+                successMessage: null, 
+                user: req.session.user, 
+                errorMessage: req.session.errorMessage, 
+                typedFields: req.session.typedFields 
+            });
+        }
+    
+        // Check if stock is provided and is a valid number
+        if (!stock || isNaN(stock)) {
+            req.session.errorMessage = 'Valid stock quantity is required';
+            return res.render('admin/add-item', { 
+                categories, 
+                successMessage: null, 
+                user: req.session.user, 
+                errorMessage: req.session.errorMessage, 
+                typedFields: req.session.typedFields 
+            });
+        }
+
+        // Check if file is provided
+        if (!req.file) {
+            req.session.errorMessage = 'File upload is required';
+            return res.render('admin/add-item', { 
+                categories, 
+                successMessage: null, 
+                user: req.session.user, 
+                errorMessage: req.session.errorMessage, 
+                typedFields: req.session.typedFields 
+            });
+        }
+
+        try {
+            // Check if product with the same name already exists
+            const existingProduct = await productModel.findOne({ name });
+            if (existingProduct) {
+                req.session.errorMessage = 'Product already exists';
+                return res.render('admin/add-item', { 
+                    user: req.session.user, 
+                    successMessage: null, 
+                    errorMessage: req.session.errorMessage, 
+                    categories,
+                    typedFields: req.session.typedFields
+                });
+            }
+
+            // Save the new product to the database
+            const newProduct = new productModel({
+                name,
+                category,
+                price,
+                description,
+                stock,
+                // Use req.file.filename to save the filename in the database
+                image: req.file.filename, 
+                status: true
+            });
+
+            await newProduct.save();
+            req.session.successMessage = 'Product added successfully';
+            return res.render('admin/add-item', { 
+                user: req.session.user, 
+                successMessage: req.session.successMessage, 
+                errorMessage: null, 
+                categories,
+                typedFields: req.session.typedFields 
+            });
+        } catch (error) {
+            console.error(error);
+            req.session.errorMessage = 'Error: Unable to add product to the database.';
+            return res.render('admin/add-item', { 
+                user: req.session.user, 
+                successMessage: null, 
+                errorMessage: req.session.errorMessage, 
+                categories,
+                typedFields: req.session.typedFields
+            });
+        }
+    } else {
+        return res.redirect('/admin');
+    }
+};
+
+
+
+const productModel = require('../../model/productModel');
+const Category = require('../../model/categoryModel');
+const multer = require('multer');
+
+
+
+
+
+
+
+ // // Check if file is a .jpg or .jpeg file
+        // if (!lowercaseFilename.endsWith('.jpg') && !lowercaseFilename.endsWith('.jpeg')) {
+        //     req.session.errorMessage = 'Only jpg or jpeg files are supported';
+        //     return res.render('admin/add-item', { 
+        //         categories, 
+        //         successMessage: null, 
+        //         user: req.session.user, 
+        //         errorMessage: req.session.errorMessage, 
+        //         typedFields: req.session.typedFields 
+        //     });
+        // }
+
+const submitItems = async (req, res) => {
+            console.log("req.body", req.body); // Check if other form fields are being parsed correctly
+            console.log("req.files", req.files);
+        
+            const { name, category, price, description, stock } = req.body; // Remove 'image' from here
+            const categories = await Category.find();
+            req.session.typedFields = { name, category, price, description, stock };
+        
+            if (req.session.user && req.session.user.isAdmin) {
+                if (!name || !category || !price || isNaN(price) || !description || !stock || isNaN(stock)) {
+                    req.session.errorMessage = 'All fields are required and must be valid';
+                    return res.render('admin/add-item', {
+                        categories,
+                        successMessage: null,
+                        user: req.session.user,
+                        errorMessage: req.session.errorMessage,
+                        typedFields: req.session.typedFields
+                    });
+                }
+        
+                try {
+                    // Validate uploaded files
+                    if (!req.files || req.files.length === 0) {
+                        req.session.errorMessage = 'At least one image is required';
+                        return res.render('admin/add-item', {
+                            categories,
+                            successMessage: null,
+                            user: req.session.user,
+                            errorMessage: req.session.errorMessage,
+                            typedFields: req.session.typedFields
+                        });
+                    }
+        
+                    const validFiles = req.files.filter(file => file.mimetype.startsWith('image/') && file.size <= (5 * 1024 * 1024)); // 5MB file size limit
+        
+                    if (validFiles.length !== req.files.length) {
+                        req.session.errorMessage = 'Some files are not images or exceed the size limit (5MB)';
+                        return res.render('admin/add-item', {
+                            categories,
+                            successMessage: null,
+                            user: req.session.user,
+                            errorMessage: req.session.errorMessage,
+                            typedFields: req.session.typedFields
+                        });
+                    }
+        
+                    // Proceed with saving the product data and image paths to the database
+                    const existingProduct = await productModel.findOne({ name });
+                    if (existingProduct) {
+                        req.session.errorMessage = 'Product already exists';
+                        return res.render('admin/add-item', {
+                            user: req.session.user,
+                            successMessage: null,
+                            errorMessage: req.session.errorMessage,
+                            categories,
+                            typedFields: req.session.typedFields
+                        });
+                    }
+        
+                    const newProduct = new productModel({
+                        name,
+                        category,
+                        price,
+                        description,
+                        stock,
+                        image: validFiles.map(file => file.path), // Use valid files for saving image paths
+                        status: true
+                    });
+        
+                    await newProduct.save();
+                    req.session.successMessage = 'Product added successfully';
+                    return res.render('admin/add-item', {
+                        user: req.session.user,
+                        successMessage: req.session.successMessage,
+                        errorMessage: null,
+                        categories,
+                        typedFields: req.session.typedFields
+                    });
+                } catch (error) {
+                    console.error(error);
+                    req.session.errorMessage = 'Error: Unable to add product to the database.';
+                    return res.render('admin/add-item', {
+                        user: req.session.user,
+                        successMessage: null,
+                        errorMessage: req.session.errorMessage,
+                        categories,
+                        typedFields: req.session.typedFields
+                    });
+                }
+            } else {
+                return res.redirect('/admin');
+            }
+        };
+        
+
+const getsubmitItems = async (req, res) => {
+    try {
+        const categories= await Category.find();
+        // Define typedFields with the appropriate values
+        
+        res.render('admin/add-item', { user: req.session.user, successMessage: null, errorMessage: null, categories, typedFields: req.session.typedFields });
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Internal Server Error');
+    }
+};
+
+const updateProduct = async (req, res) => {
+    try {
+        const productId = req.params.productId;
+        // Retrieve updated product data from the request body
+        const updatedProductData = req.body;
+
+        // Update the product in the database
+        const updatedProduct = await Product.findByIdAndUpdate(productId, updatedProductData, { new: true });
+
+        // Send the updated product as a response
+        res.status(200).json(updatedProduct);
+    } catch (error) {
+        console.error('Error updating product:', error);
+        res.status(500).send('Internal Server Error');
+    }
+};
+
+const deleteImage = async (req, res) => {
+    try {
+        const productId = req.params.productId;
+        const imageId = req.params.imageId;
+
+        // Find the product by ID
+        const product = await Product.findById(productId);
+        if (!product) {
+            return res.status(404).send('Product not found');
+        }
+
+        // Remove the image from the product's image array
+        product.image.pull(imageId);
+
+        // Save the updated product
+        await product.save();
+
+        res.status(200).send('Image deleted successfully');
+    } catch (error) {
+        console.error('Error deleting image:', error);
+        res.status(500).send('Internal Server Error');
+    }
+};
+
+
+
+
+const itemsList = async (req, res) => {
+    try {
+        const Products = await productModel.find();
+        if (req.session.user && req.session.user.isAdmin) {
+            // Pass success or error messages if they exist
+            const successMessage = req.session.successMessage;
+            const errorMessage = req.session.errorMessage;
+            // Clear the session variables after retrieving their values
+            delete req.session.successMessage;
+            delete req.session.errorMessage;
+            res.render('admin/items-list', { user: req.session.user, Products, successMessage, errorMessage });
+        } else {
+            res.render('admin/adminLogin');
+        }
+    } catch (error) {
+        // Handle any errors that might occur during database query
+        console.error(error);
+        res.status(500).send('Internal Server Error');
+    }
+};
+
+
+
+
+const itemEditor = async (req, res) => {
+    
+    const { productId } = req.params;
+    try {
+        const product = await productModel.findById(productId);
+        if (!product) {
+            return res.status(404).send('Product not found');
+        }
+
+        // Fetch category name
+        const category = await Category.findById(product.category);
+        const categoryName = category ? category.name : '';
+
+        const successMessage = req.query.successMessage || '';
+        const errorMessage = req.query.errorMessage || '';
+        const categories = await Category.find();
+        
+        if (req.session.user && req.session.user.isAdmin) {
+            res.render("admin/item-editor", { user: req.session.user, product, categoryName, successMessage, errorMessage ,categories});
+        } else {
+            res.render('admin/adminLogin');
+        }
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Internal Server Error');
+    }
+};
+
+
+
+const updateImage= async (req, res) => {
+    console.log("Requested update with:", req.body);
+    const { productId } = req.params;
+    const { name, category, price, description, stock } = req.body;
+
+    if (req.session.user && req.session.user.isAdmin) {
+        // Example validation: Check if name, category, and price are provided
+        if (!name || !category || !price) {
+            req.session.errorMessage = 'Name, category, and price are required';
+            return res.redirect(`/admin/item-editor/${productId}?errorMessage=Name, category, and price are required`);
+        }
+
+
+        try {
+            const product = await productModel.findById(productId);
+            if (!product) {
+                return res.status(404).send('Product not found');
+            }
+
+            // Update product details
+            product.name = name;
+            product.category = category;
+            product.price = price;
+            product.description = description;
+            product.stock = stock;
+
+            // Check if files are uploaded
+            if (req.files && req.files.length > 0) {
+                // Update product images
+                const newImages = req.files.map(file => file.path);
+                product.image = [...product.image, ...newImages];
+            }
+
+            // Check for deleted images
+            if (req.body.deletedImages) {
+                const deletedImages = JSON.parse(req.body.deletedImages);
+                deletedImages.forEach(deletedImage => {
+                    // Remove deleted image from the array
+                    const index = product.image.indexOf(deletedImage.path);
+                    if (index !== -1) {
+                        product.image.splice(index, 1);
+                    }
+                });
+            }
+
+            await product.save();
+
+            req.session.successMessage = 'Product updated successfully';
+            return res.redirect(`/admin/items-list`);
+        } catch (error) {
+            console.error(error);
+            req.session.errorMessage = 'Error updating product';
+            return res.redirect(`/admin/item-editor/${productId}?errorMessage=Error updating product`);
+        }
+    } else {
+        return res.status(403).send('Unauthorized');
+    }
+};
+
+
+
+
+const deleteProduct = async (req, res) => {
+    if (req.session.user && req.session.user.isAdmin) {
+        const productId = req.params.productId;
+
+        try {
+            const result = await productModel.updateOne(
+                { _id: productId },
+                { $set: { status: false } }
+            );
+
+            if (result.modifiedCount === 1) {
+                console.log(`Product with ID ${productId} soft deleted successfully`);
+                req.session.successMessage = 'Product soft deleted successfully';
+            } else {
+                console.log(`Product with ID ${productId} not found`);
+                req.session.errorMessage = 'Product not found';
+            }
+        } catch (error) {
+            console.error("Error deleting product:", error);
+            req.session.errorMessage = 'Internal Server Error';
+        }
+
+        res.redirect("/admin/items-list");
+    } else {
+        res.status(403).send("Forbidden");
+    }
+};
+
+const activateProduct = async (req, res) => {
+    if (req.session.user && req.session.user.isAdmin) {
+        const productId = req.params.productId;
+
+        try {
+            const result = await productModel.updateOne(
+                { _id: productId },
+                { $set: { status: true } }
+            );
+
+            if (result.modifiedCount === 1) {
+                console.log(`Product with ID ${productId} activated successfully`);
+                req.session.successMessage = 'Product activated successfully';
+            } else {
+                console.log(`Product with ID ${productId} not found`);
+                req.session.errorMessage = 'Product not found';
+            }
+        } catch (error) {
+            console.error("Error activating product:", error);
+            req.session.errorMessage = 'Internal Server Error';
+        }
+
+        res.redirect("/admin/items-list");
+    } else {
+        res.status(403).send("Forbidden");
+    }
+};
+
+// Assuming you have already imported necessary modules and set up your Express app
+
+// Define a route for handling GET requests to /product-img-editor
+const productImgEditor = async (req, res) => {
+    try {
+        // Retrieve the product ID from the request parameters
+        const productId = req.query.productId;
+
+        // Log the product ID to ensure it's being received correctly
+        console.log('Product ID:', productId);
+
+        // Fetch the selected product using the product ID
+        const product = await productModel.findById(productId);
+
+        if (!product) {
+            // If the product is not found, return a 404 error
+            return res.status(404).send('Product not found');
+        }
+
+        // Check if the user is an admin
+        if (req.session.user && req.session.user.isAdmin) {
+            // Pass success or error messages if they exist
+            const successMessage = req.session.successMessage;
+            const errorMessage = req.session.errorMessage;
+            // Clear the session variables after retrieving their values
+            delete req.session.successMessage;
+            delete req.session.errorMessage;
+            // Render the product-img-editor page with the selected product
+            res.render('admin/product-img-editor', { user: req.session.user, product, successMessage, errorMessage });
+        } else {
+            // If the user is not an admin, redirect to the admin login page
+            res.render('admin/adminLogin');
+        }
+    } catch (error) {
+        // Handle any errors that might occur during database query
+        console.error(error);
+        res.status(500).send('Internal Server Error');
+    }
+};
+
+
+
+
+
+
+module.exports = { submitItems, getsubmitItems,itemsList ,itemEditor,updateProduct,
+    deleteProduct,activateProduct,deleteImage,productImgEditor,updateImage};
+
+
+    <%- include ("adminHead.ejs") %>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Product</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@10/dist/sweetalert2.min.css">
+    <style>
+        .center-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .form-container {
+            max-width: 500px;
+            /* Adjust as needed */
+            width: 100%;
+        }
+
+        .image-button-container {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            /* Adjust as needed */
+        }
+
+        .image-button-container img {
+            width: 100px;
+            height: 100px;
+            margin-right: 10px;
+            /* Adjust as needed */
+        }
+    </style>
+</head>
+
+<body>
+    
+
+    <div class="main-panel">
+        <div class="center-container">
+            <div class="container form-container">
+                <h1 class="mb-4">Update Product Images</h1>
+                <form action="/admin/updateImage/<%= product._id %>" method="post" enctype="multipart/form-data">
+
+                    <% if(product.image && product.image.length > 0){ %>
+                    <% product.image.forEach(item => { %>
+                    <div class="image-button-container">
+                        <% if(item && item.length > 0){ %>
+                        <img src="/<%= item %>" alt="image not found">
+                        <% } %>
+                        <div>
+                            <button onclick="delImage('<%= product._id %>', '<%= item %>')" class="btn btn-danger btn-xs">Delete</button>
+                        </div>
+                    </div>
+                    <% }) %>
+                    <% } else { %>
+                    <div>
+                        <h2 class="text-danger">No Images Found</h2>
+                    </div>
+                    <% } %>
+                    <div class="mb-3">
+                        <label for="image" class="form-label">Add New Images:</label>
+                        <input type="file" class="form-control" id="image" name="image" accept="image/*" multiple>
+                    </div>
+                    <div id="imagePreview"></div>
+                    <button type="submit" class="btn btn-primary">Save Image</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <%- include ("adminFooter.ejs") %>
+
+    <script>
+        document.getElementById("image").addEventListener("change", function () {
+            var files = this.files;
+            var imagePreview = document.getElementById("imagePreview");
+
+            imagePreview.innerHTML = "";
+
+            for (var i = 0; i < files.length; i++) {
+                var file = files[i];
+                var reader = new FileReader();
+
+                reader.onload = function (e) {
+                    var img = document.createElement("img");
+                    img.src = e.target.result;
+                    img.style.maxWidth = "100px";
+                    img.style.maxHeight = "100px";
+                    img.style.marginRight = "10px";
+                    img.style.marginBottom = "10px";
+                    imagePreview.appendChild(img);
+                };
+
+                reader.readAsDataURL(file);
+            }
+        });
+
+        function delImage(productId, filename) {
+            Swal.fire({
+                title: "Are you sure?",
+                text: "Are you sure you want to delete this image?",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#3085d6",
+                cancelButtonColor: "#d33",
+                confirmButtonText: "Confirm",
+                cancelButtonText: "Cancel",
+                dangerMode: true,
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Send a POST request to the delete route
+                    fetch('/admin/delete-image', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            productId: productId,
+                            filename: filename
+                        })
+                    })
+                    .then(response => {
+                        if (response.ok) {
+                            // Refresh the page after successful deletion
+                            window.location.reload();
+                        } else {
+                            console.error('Error deleting image');
+                            // Handle error or provide feedback to the user
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        // Handle error or provide feedback to the user
+                    });
+                } else {
+                    console.log("User canceled");
+                }
+            }).catch((error) => {
+                console.error("An error occurred:", error);
+                // Handle error or provide feedback to the user
+            });
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+    <!-- Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.1/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+
+</html>

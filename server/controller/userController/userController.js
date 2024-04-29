@@ -6,8 +6,12 @@ const router = express.Router();
 const flash = require('express-flash');
 const otpModel = require('../../model/otpModel');
 const productModel = require('../../model/productModel');
+const Address= require('../../model/addressModel');
 const Category = require('../../model/categoryModel');
 // const { sendOTP } = require('../controller/userController/otpController');
+const isAuthenticated = require('../../../middelware/userAuth'); // Import the isAuthenticated function
+const Order = require('../../model/orderModel');
+
 
 router.use(flash());
 
@@ -227,17 +231,7 @@ const loginPost = async (req, res) => {
 
 
 
-const authenticateUser = (req, res, next) => {
-    // Check if user is authenticated (you need to implement this logic based on your authentication mechanism)
-    const isAuthenticated = req.session.isAuth || false; // Assuming req.session.isAuth is set after successful authentication
-    
-    // Store the authentication status in the request object
-    req.isAuthenticated = isAuthenticated;
-    req.userDetails = req.session.user; // Assuming user details are stored in req.session.user
-    console.log("user signed and passed middleware: ", req.userDetails);
-    
-    next();
-};
+
 
 // Index route
 const index = async (req, res) => {
@@ -318,7 +312,196 @@ const getProduct = async (req, res) => {
     }
 };
 
+const profile = async (req, res) => {
+    try {
+        // Assuming you have a UserModel for managing user data
+        const userId = req.session.userId; // Assuming you have authenticated users
+        const user = await User.findById(userId);
+        const categories = await Category.find();
+        const address = await Address.find();
+
+        if (!user) {
+            // If user not found, handle it appropriately (e.g., redirect to login page)
+            return res.redirect('/login');
+        }
+
+        // Render the edit-profile template with the user's data and isAuthenticated variable
+        res.render('user/profile', { user, isAuthenticated: req.isAuthenticated,categories,address  });
+    } catch (error) {
+        console.error('Error fetching user profile:', error);
+        // Handle errors (e.g., render an error page)
+        res.status(500).send('Internal Server Error');
+    }
+};
+const EditProfile= async (req, res) => {
+    try {
+        // Assuming you have a UserModel for managing user data
+        const userId = req.session.userId; // Assuming you have authenticated users
+        const user = await User.findById(userId);
+        const categories = await Category.find();
+        const address = await Address.find();
+
+        if (!user) {
+            // If user not found, handle it appropriately (e.g., redirect to login page)
+            return res.redirect('/login');
+        }
+
+        // Render the edit-profile template with the user's data and isAuthenticated variable
+        res.render('user/Edit-profile', { user, isAuthenticated: req.isAuthenticated,categories,address  });
+    } catch (error) {
+        console.error('Error fetching user profile:', error);
+        // Handle errors (e.g., render an error page)
+        res.status(500).send('Internal Server Error');
+    }
+}; 
+
+
+
+
+
+
+const orders = async (req, res) => {
+    try {
+        // Assuming you have a UserModel for managing user data
+        const userId = req.session.userId; // Assuming you have authenticated users
+        const user = await User.findById(userId);
+        const categories = await Category.find();
+        const address = await Address.find();
+
+        if (!user) {
+            // If user not found, handle it appropriately (e.g., redirect to login page)
+            return res.redirect('/login');
+        }
+
+        // Create a new order object using the Order model
+        const newOrder = new Order({
+            userId: userId,
+            orderId: shortid.generate(),
+            items: req.body.items, // Assuming items are sent in the request body
+            wallet: req.body.wallet, // Assuming wallet amount is sent in the request body
+            status: 'pending',
+            address: req.body.address, // Assuming address is sent in the request body
+            amount: req.body.amount, // Assuming order amount is sent in the request body
+            payment: req.body.payment, // Assuming payment method is sent in the request body
+            createdAt: new Date(),
+            updated: new Date()
+        });
+
+        // Save the new order to the database
+        await newOrder.save();
+
+        // Render the My-order template with the user's data and isAuthenticated variable
+        res.render('user/My-order', { user, isAuthenticated: req.isAuthenticated, categories, address });
+    } catch (error) {
+        console.error('Error creating new order:', error);
+        // Handle errors (e.g., render an error page)
+        res.status(500).send('Internal Server Error');
+    }
+};
+
+const address= async (req, res) => {
+    try {
+        // Assuming you have a UserModel for managing user data
+        const userId = req.session.userId; // Assuming you have authenticated users
+        const user = await User.findById(userId);
+        const categories = await Category.find();
+        const address = await Address.find();
+
+        if (!user) {
+            // If user not found, handle it appropriately (e.g., redirect to login page)
+            return res.redirect('/login');
+        }
+
+        // Render the edit-profile template with the user's data and isAuthenticated variable
+        res.render('user/Address', { user, isAuthenticated: req.isAuthenticated,categories,address  });
+    } catch (error) {
+        console.error('Error fetching user profile:', error);
+        // Handle errors (e.g., render an error page)
+        res.status(500).send('Internal Server Error');
+    }
+}; 
+const wallet= async (req, res) => {
+    try {
+        // Assuming you have a UserModel for managing user data
+        const userId = req.session.userId; // Assuming you have authenticated users
+        const user = await User.findById(userId);
+        const categories = await Category.find();
+        const address = await Address.find();
+
+        if (!user) {
+            // If user not found, handle it appropriately (e.g., redirect to login page)
+            return res.redirect('/login');
+        }
+
+        // Render the edit-profile template with the user's data and isAuthenticated variable
+        res.render('user/Wallet', { user, isAuthenticated: req.isAuthenticated,categories,address  });
+    } catch (error) {
+        console.error('Error fetching user profile:', error);
+        // Handle errors (e.g., render an error page)
+        res.status(500).send('Internal Server Error');
+    }
+}; 
+const coupons= async (req, res) => {
+    try {
+        // Assuming you have a UserModel for managing user data
+        const userId = req.session.userId; // Assuming you have authenticated users
+        const user = await User.findById(userId);
+        const categories = await Category.find();
+        const address = await Address.find();
+
+        if (!user) {
+            // If user not found, handle it appropriately (e.g., redirect to login page)
+            return res.redirect('/login');
+        }
+
+        // Render the edit-profile template with the user's data and isAuthenticated variable
+        res.render('user/Coupons', { user, isAuthenticated: req.isAuthenticated,categories,address  });
+    } catch (error) {
+        console.error('Error fetching user profile:', error);
+        // Handle errors (e.g., render an error page)
+        res.status(500).send('Internal Server Error');
+    }
+};
+const resetpassword= async (req, res) => {
+    try {
+        // Assuming you have a UserModel for managing user data
+        const userId = req.session.userId; // Assuming you have authenticated users
+        const user = await User.findById(userId);
+        const categories = await Category.find();
+        const address = await Address.find();
+
+        if (!user) {
+            // If user not found, handle it appropriately (e.g., redirect to login page)
+            return res.redirect('/login');
+        }
+
+        // Render the edit-profile template with the user's data and isAuthenticated variable
+        res.render('user/Reset-password', { user, isAuthenticated: req.isAuthenticated,categories,address  });
+    } catch (error) {
+        console.error('Error fetching user profile:', error);
+        // Handle errors (e.g., render an error page)
+        res.status(500).send('Internal Server Error');
+    }
+};
+const UpdateProfile= (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
+
+    // Update user's profile in the database
+    // Example:
+    const { username, email, phone } = req.body;
+    // Update logic here
+
+    res.send('Profile updated successfully');
+};
+
+
+
+//req.session.isAuth
 
 
 module.exports = { validateSignup, signupPost, signupGet, loginPost, loginGet
-    ,index,cartGet,logout,getProduct,authenticateUser};
+    ,index,cartGet,logout,getProduct,EditProfile,orders,profile,address,wallet,
+    coupons,resetpassword,UpdateProfile};

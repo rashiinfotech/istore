@@ -1,0 +1,139 @@
+<%- include ('header.ejs') %>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Address Book</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .container {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .content {
+            max-width: 600px;
+            background-color: #ffffff;
+            border-radius: 10px;
+            padding: 40px;
+            box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        .address-card {
+            text-align: left;
+            margin-bottom: 20px;
+        }
+        .modal-content {
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <!-- Header content -->
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+          
+        </nav>
+    </header>
+
+    <div class="container">
+        <div class="content">
+            <div class="address-card" id="address-card">
+                <h2>Primary Address</h2>
+                <p><strong>Name:</strong> <span id="name"></span></p>
+                <p><strong>Street:</strong> <span id="street"></span></p>
+                <p><strong>City:</strong> <span id="city"></span></p>
+                <p><strong>State:</strong> <span id="state"></span></p>
+                <p><strong>ZIP:</strong> <span id="zip"></span></p>
+                <p><strong>Country:</strong> <span id="country"></span></p>
+            </div>
+
+            <!-- Bootstrap modal for adding new address -->
+            <div class="modal" id="addAddressModal">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Add New Address</h5>
+                            <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        </div>
+                        <div class="modal-body">
+                            <form id="address-form">
+                                <div class="form-group">
+                                    <label for="name">Name:</label>
+                                    <input type="text" id="name-input" name="name" class="form-control">
+                                </div>
+                                <div class="form-group">
+                                    <label for="street">Street:</label>
+                                    <input type="text" id="street-input" name="street" class="form-control">
+                                </div>
+                                <div class="form-group">
+                                    <label for="city">City:</label>
+                                    <input type="text" id="city-input" name="city" class="form-control">
+                                </div>
+                                <div class="form-group">
+                                    <label for="state">State:</label>
+                                    <input type="text" id="state-input" name="state" class="form-control">
+                                </div>
+                                <div class="form-group">
+                                    <label for="zip">ZIP:</label>
+                                    <input type="text" id="zip-input" name="zip" class="form-control">
+                                </div>
+                                <div class="form-group">
+                                    <label for="country">Country:</label>
+                                    <input type="text" id="country-input" name="country" class="form-control">
+                                </div>
+                            </form>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-primary" onclick="addAddress()">Submit</button>
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addAddressModal">Add New Address</button>
+        </div>
+    </div>
+
+    <footer class="footer mt-auto py-3 bg-light">
+        <!-- Footer content -->
+        <div class="container text-center">
+          
+        </div>
+        <%- include ("footer.ejs") %>
+    </footer>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        function addAddress() {
+            var name = document.getElementById("name-input").value;
+            var street = document.getElementById("street-input").value;
+            var city = document.getElementById("city-input").value;
+            var state = document.getElementById("state-input").value;
+            var zip = document.getElementById("zip-input").value;
+            var country = document.getElementById("country-input").value;
+
+            document.getElementById("name").textContent = name;
+            document.getElementById("street").textContent = street;
+            document.getElementById("city").textContent = city;
+            document.getElementById("state").textContent = state;
+            document.getElementById("zip").textContent = zip;
+            document.getElementById("country").textContent = country;
+
+            $('#addAddressModal').modal('hide');
+        }
+    </script>
+</body>
+</html>

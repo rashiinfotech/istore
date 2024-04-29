@@ -1,0 +1,164 @@
+<%- include ("adminHead.ejs") %>
+
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
+<div class="sidebar-mobile-menu-handle" id="sidebar-mobile-menu-handle"></div>
+<div class="mobile-menu-handle"></div>
+<article class="content item-editor-page">
+    <div class="title-block">
+        <h3 class="title"> Product Image Editor </h3>
+    </div>
+    <div class="main-panel">
+        <div class="center-container">
+            <div class="container form-container">
+              
+                <form action="/admin/updateImage/<%= product._id %>" method="post" enctype="multipart/form-data">
+        
+                    <% if(product.image && product.image.length > 0){ %>
+                    <div class="image-row">
+                        <% product.image.forEach((item, index) => { %>
+                        <div class="image-button-container">
+                            <% if(item && item.length > 0){ %>
+                            <img src="/<%= item %>" alt="image not found" style="max-width: 150px; max-height: 150px;">
+                            <% } %>
+                            <div>
+                                <button onclick="confirmDelete(<%= index %>)" class="btn btn-danger btn-xs">Delete</button>
+                            </div>
+                            <!-- Form to submit delete request -->
+                            <form id="deleteForm<%= index %>" action="/admin/delete-image" method="POST" style="display: none;">
+                                <input type="hidden" name="productId" value="<%= product._id %>">
+                                <input type="hidden" name="filename" value="<%= item %>">
+                            </form>
+                        </div>
+                        <% }) %>
+                    </div>
+                    <% } else { %>
+                    <div>
+                        <h2 class="text-danger">No Images Found</h2>
+                    </div>
+                    <% } %>
+                    <div class="mb-3">
+                        <label for="image" class="form-label">Add New Images:</label>
+                        <input type="file" class="form-control" id="image" name="image" accept="image/*" multiple>
+                    </div>
+                    <div id="imagePreview"></div>
+                    <button type="submit" class="btn btn-primary">Save Image</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <!-- Include update button within the article -->
+    <div class="form-group row">
+        <div class="col-sm-10 col-sm-offset-2">
+           
+        </div>
+    </div>
+</article>
+
+<%- include ("adminFooter.ejs") %>
+
+<!-- Confirmation Modal -->
+<div class="modal fade" id="confirm-modal">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">
+                    <i class="fa fa-warning"></i> Alert</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete this image?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="confirm-yes">Yes</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">No</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- End Confirmation Modal -->
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+<script>
+    var deleteIndex;
+
+    function confirmDelete(index) {
+        deleteIndex = index;
+        $('#confirm-modal').modal('show');
+    }
+
+    $('#confirm-yes').on('click', function () {
+        var formId = "deleteForm" + deleteIndex;
+        document.getElementById(formId).submit();
+    });
+
+    function delImage(productId, filename) {
+        Swal.fire({
+            title: "Are you sure?",
+            text: "Are you sure you want to delete this image?",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Confirm",
+            cancelButtonText: "Cancel",
+            dangerMode: true,
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Send a POST request to the delete route
+                fetch('/admin/delete-image', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        productId: productId,
+                        filename: filename
+                    })
+                })
+                .then(response => {
+                    if (response.ok) {
+                        // Refresh the page after successful deletion
+                        window.location.reload();
+                    } else {
+                        console.error('Error deleting image');
+                        // Handle error or provide feedback to the user
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    // Handle error or provide feedback to the user
+                });
+            } else {
+                console.log("User canceled");
+            }
+        }).catch((error) => {
+            console.error("An error occurred:", error);
+            // Handle error or provide feedback to the user
+        });
+    }
+
+    function goBack() {
+        window.history.back();
+    }
+
+    // Function to submit the form to the update route
+    function saveImage() {
+        document.querySelector('form').submit();
+    }
+</script>
+
+<style>
+    .image-row {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: flex-start; /* Align images from the left */
+    }
+    .image-button-container {
+        width: 150px; /* Width of each image container */
+        margin-right: 20px; /* Spacing between images */
+        margin-bottom: 20px; /* Spacing below images */
+        text-align: center;
+    }
+</style>

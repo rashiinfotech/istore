@@ -7,8 +7,8 @@
     <div class="title-block">
         <h3 class="title">Add New Item</h3>
     </div>
-    <form name="item" action="/admin/submitItems" method="POST" enctype="multipart/form-data" >
-        <% if (successMessage) { %>
+    <form name="item" action="/admin/submitItems" method="POST" enctype="multipart/form-data">
+         <% if (successMessage) { %>
             <div class="alert alert-success" role="alert">
                 <%= successMessage %>
             </div>
@@ -18,76 +18,131 @@
             </div>
         <% } %>
         <div class="card card-block">
+            <!-- Name -->
             <div class="form-group row">
                 <label class="col-sm-2 col-form-label">Name:</label>
                 <div class="col-sm-10">
-                    <input type="text" class="form-control boxed" name="name" placeholder="Enter Product Name">
+                    <input type="text" class="form-control boxed" name="name" placeholder="Enter Product Name" value="<%= typedFields && typedFields.name ? typedFields.name : '' %>">
+                    <% if (errorMessage && errorMessage.field === 'name') { %>
+                        <div class="error-message"><%= errorMessage.message %></div>
+                    <% } %>
                 </div>
             </div>
+            <!-- Category -->
             <div class="form-group row">
                 <label class="col-sm-2 col-form-label">Category:</label>
                 <div class="col-sm-10">
                     <select class="form-control boxed" name="category">
                         <option selected disabled>Select Category</option>
                         <% categories.forEach(category => { %>
-                        <option value="<%= category._id %>"><%= category.name %></option>
+                            <option value="<%= category._id %>" <%= typedFields && typedFields.category === category._id ? 'selected' : '' %>><%= category.name %></option>
                         <% }); %>
                     </select>
+                    <% if (errorMessage && errorMessage.field === 'category') { %>
+                        <div class="error-message"><%= errorMessage.message %></div>
+                    <% } %>
                 </div>
             </div>
+            <!-- Price -->
             <div class="form-group row">
                 <label class="col-sm-2 col-form-label">Price:</label>
                 <div class="col-sm-10">
-                    <input type="text" class="form-control boxed" name="price" placeholder="Enter Product Cost">
+                    <input type="text" class="form-control boxed" name="price" placeholder="Enter Product Cost" value="<%= typedFields && typedFields.price ? typedFields.price : '' %>">
+                    <% if (errorMessage && errorMessage.field === 'price') { %>
+                        <div class="error-message"><%= errorMessage.message %></div>
+                    <% } %>
                 </div>
             </div>
+            <!-- Description -->
             <div class="form-group row">
                 <label class="col-sm-2 col-form-label">Description:</label>
                 <div class="col-sm-10">
-                    <input type="text" class="form-control boxed" name="description" placeholder="Enter Product Description">
+                    <input type="text" class="form-control boxed" name="description" placeholder="Enter Product Description" value="<%= typedFields && typedFields.description ? typedFields.description : '' %>">
+                    <% if (errorMessage && errorMessage.field === 'description') { %>
+                        <div class="error-message"><%= errorMessage.message %></div>
+                    <% } %>
                 </div>
             </div>
+            <!-- Stock -->
             <div class="form-group row">
                 <label class="col-sm-2 col-form-label">Stock:</label>
                 <div class="col-sm-10">
-                    <input type="text" class="form-control boxed" name="stock" placeholder="Enter Available Stock">
+                    <input type="text" class="form-control boxed" name="stock" placeholder="Enter Available Stock" value="<%= typedFields && typedFields.stock ? typedFields.stock : '' %>">
+                    <% if (errorMessage && errorMessage.field === 'stock') { %>
+                        <div class="error-message"><%= errorMessage.message %></div>
+                    <% } %>
                 </div>
             </div>
-            <!-- Image Upload -->
-            <div class="form-group row">
-                <label class="col-sm-2 col-form-label">Images:</label>
-                <div class="col-sm-10">
-                    <input type="file" name="image" id="image-input" multiple required accept="image/*">
-                </div>
+             <!-- Image Upload -->
+        <div class="form-group row">
+            <label class="col-sm-2 col-form-label">Images:</label>
+            <div class="col-sm-10">
+                <input type="file" name="image" id="image-input" multiple accept="image/*">
+                <div id="image-preview-container" class="row"></div>
             </div>
-            <!-- Display selected photos -->
-            <div id="selected-photos" class="row"></div>
-            <div class="form-group row">
-                <div class="col-sm-10 offset-sm-2">
-                    <button type="submit" class="btn btn-primary">Submit</button>
-                </div>
+        </div>
+
+        <!-- Submit button -->
+        <div class="form-group row">
+            <div class="col-sm-10 offset-sm-2">
+                <button type="submit" class="btn btn-primary">Submit</button>
             </div>
         </div>
     </form>
 </article>
-<script>
-document.addEventListener("DOMContentLoaded", function() {
-    // Add event listener to the file input
-    document.getElementById("image-input").addEventListener("change", function(event) {
-        const selectedPhotosContainer = document.getElementById("selected-photos");
-        selectedPhotosContainer.innerHTML = ""; // Clear previous selected photos
 
-        // Loop through selected files and display them as images
-        Array.from(event.target.files).forEach(function(file) {
-            const img = document.createElement("img");
-            img.src = URL.createObjectURL(file);
-            img.alt = "Uploaded Photo";
-            img.width = 100; // Adjust the width here to control the size of the thumbnails
-            img.classList.add("col-sm-3"); // Add Bootstrap column class
-            selectedPhotosContainer.appendChild(img);
+<!-- Include Cropper.js library -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
+
+<!-- JavaScript code for image preview -->
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const imageInput = document.getElementById("image-input");
+        const imagePreviewContainer = document.getElementById("image-preview-container");
+
+        // Add event listener to the file input
+        imageInput.addEventListener("change", function(event) {
+            const files = event.target.files;
+
+            // Clear the existing selected photos
+            imagePreviewContainer.innerHTML = '';
+
+            // Loop through selected files and display them as images
+            Array.from(files).forEach(function(file) {
+                const container = document.createElement("div");
+                container.classList.add("preview-container", "col-sm-3"); // Add Bootstrap column class
+
+                const img = document.createElement("img");
+                img.src = URL.createObjectURL(file);
+                img.alt = "Uploaded Photo";
+                img.width = 100; // Adjust the width here to control the size of the thumbnails
+
+                container.appendChild(img);
+                imagePreviewContainer.appendChild(container);
+            });
+        });
+
+        // Function to confirm before deleting image
+        function confirmDelete(index) {
+            if (confirm("Are you sure you want to delete this image?")) {
+                // Here you can add logic to delete the image
+                // For example, you can submit a form to delete the image
+                // document.getElementById("delete-form-" + index).submit();
+                console.log("Image deletion confirmed for index", index);
+            }
+        }
+
+        // Add event listeners to delete buttons
+        const deleteButtons = document.querySelectorAll(".delete-button");
+        deleteButtons.forEach(function(button, index) {
+            button.addEventListener("click", function() {
+                confirmDelete(index); // Call confirmDelete function with index
+            });
         });
     });
-});
 </script>
+
+
+
 
 <%- include ("adminFooter.ejs") %>
