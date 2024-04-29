@@ -1,5 +1,6 @@
 const express = require('express');
 const userRouter = express.Router();
+const{ cart}=require('../controller/userController/cartController');
 const {
     
     signupPost,
@@ -7,7 +8,6 @@ const {
     loginPost,
     loginGet,
     index,
-    cartGet,
     logout,
     getProduct,
     profile,
@@ -35,7 +35,7 @@ userRouter.post('/generateOTP', generateOtpPost);
 userRouter.get('/signup', signupGet);
 userRouter.get('/login', loginGet);
 userRouter.post('/login', loginPost);
-userRouter.get('/cart', isAuthenticated, cartGet);
+userRouter.get('/cart', isAuthenticated, cart);
 
 userRouter.get('/', isAuthenticated, index);
 userRouter.get('/logout', logout);

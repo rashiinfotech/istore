@@ -11,6 +11,8 @@ const Category = require('../../model/categoryModel');
 // const { sendOTP } = require('../controller/userController/otpController');
 const isAuthenticated = require('../../../middelware/userAuth'); // Import the isAuthenticated function
 const Order = require('../../model/orderModel');
+const shortid = require('shortid');
+const Coupon = require('../../model/couponModel');
 
 
 router.use(flash());
@@ -197,9 +199,7 @@ const loginGet = async (req, res) => {
 
 };
 
-const cartGet=async(req,res)=>{
-    res.render('user/cart');
-}
+
 
 
 const loginPost = async (req, res) => {
@@ -362,42 +362,42 @@ const EditProfile= async (req, res) => {
 
 const orders = async (req, res) => {
     try {
-        // Assuming you have a UserModel for managing user data
-        const userId = req.session.userId; // Assuming you have authenticated users
+        // Validate request body
+        if (!req.body.amount || !req.body.payment) {
+            throw new Error('Amount and payment are required fields.');
+        }
+
+        const userId = req.session.userId;
         const user = await User.findById(userId);
         const categories = await Category.find();
         const address = await Address.find();
 
         if (!user) {
-            // If user not found, handle it appropriately (e.g., redirect to login page)
             return res.redirect('/login');
         }
 
-        // Create a new order object using the Order model
         const newOrder = new Order({
             userId: userId,
             orderId: shortid.generate(),
-            items: req.body.items, // Assuming items are sent in the request body
-            wallet: req.body.wallet, // Assuming wallet amount is sent in the request body
+            items: req.body.items,
+            wallet: req.body.wallet,
             status: 'pending',
-            address: req.body.address, // Assuming address is sent in the request body
-            amount: req.body.amount, // Assuming order amount is sent in the request body
-            payment: req.body.payment, // Assuming payment method is sent in the request body
+            address: req.body.address,
+            amount: req.body.amount,
+            payment: req.body.payment,
             createdAt: new Date(),
             updated: new Date()
         });
 
-        // Save the new order to the database
         await newOrder.save();
 
-        // Render the My-order template with the user's data and isAuthenticated variable
         res.render('user/My-order', { user, isAuthenticated: req.isAuthenticated, categories, address });
     } catch (error) {
         console.error('Error creating new order:', error);
-        // Handle errors (e.g., render an error page)
         res.status(500).send('Internal Server Error');
     }
 };
+
 
 const address= async (req, res) => {
     try {
@@ -420,27 +420,27 @@ const address= async (req, res) => {
         res.status(500).send('Internal Server Error');
     }
 }; 
-const wallet= async (req, res) => {
+const wallet = async (req, res) => {
     try {
-        // Assuming you have a UserModel for managing user data
-        const userId = req.session.userId; // Assuming you have authenticated users
-        const user = await User.findById(userId);
+        const userId = req.session.userId;
+        const user = await User.findById(userId).populate('wallet.history'); // Populate the wallet history
         const categories = await Category.find();
         const address = await Address.find();
 
         if (!user) {
-            // If user not found, handle it appropriately (e.g., redirect to login page)
             return res.redirect('/login');
         }
 
-        // Render the edit-profile template with the user's data and isAuthenticated variable
-        res.render('user/Wallet', { user, isAuthenticated: req.isAuthenticated,categories,address  });
+        res.render('user/Wallet', { user, isAuthenticated: req.isAuthenticated, categories, address });
     } catch (error) {
         console.error('Error fetching user profile:', error);
-        // Handle errors (e.g., render an error page)
         res.status(500).send('Internal Server Error');
     }
-}; 
+};
+
+
+
+
 const coupons= async (req, res) => {
     try {
         // Assuming you have a UserModel for managing user data
@@ -454,14 +454,18 @@ const coupons= async (req, res) => {
             return res.redirect('/login');
         }
 
-        // Render the edit-profile template with the user's data and isAuthenticated variable
-        res.render('user/Coupons', { user, isAuthenticated: req.isAuthenticated,categories,address  });
+        // Fetch coupons data from the database
+        const coupons = await Coupon.find(); // Assuming Coupon is your Mongoose model for coupons
+
+        // Render the Coupons template with the user's data, isAuthenticated variable, and coupons data
+        res.render('user/Coupons', { user, isAuthenticated: req.isAuthenticated, categories, address, coupons });
     } catch (error) {
         console.error('Error fetching user profile:', error);
         // Handle errors (e.g., render an error page)
         res.status(500).send('Internal Server Error');
     }
 };
+
 const resetpassword= async (req, res) => {
     try {
         // Assuming you have a UserModel for managing user data
@@ -503,5 +507,5 @@ const UpdateProfile= (req, res) => {
 
 
 module.exports = { validateSignup, signupPost, signupGet, loginPost, loginGet
-    ,index,cartGet,logout,getProduct,EditProfile,orders,profile,address,wallet,
+    ,index,logout,getProduct,EditProfile,orders,profile,address,wallet,
     coupons,resetpassword,UpdateProfile};

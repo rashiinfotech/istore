@@ -1,4 +1,16 @@
-<%- include ("header.ejs") %>
+<%- include("header.ejs") %>
 
-<p1>coupons</p1>
-<%- include ("footer.ejs") %>
+<div class="container">
+    <h1>Coupons</h1>
+    <div class="coupon-list">
+        <% coupons.forEach(coupon => { %>
+            <div class="coupon">
+                <h2><%= coupon.code %></h2>
+                <p>Discount: <%= coupon.discount %> off</p>
+                <p>Expiration Date: <%= coupon.expirationDate %></p>
+            </div>
+        <% }) %>
+    </div>
+</div>
+
+<%- include("footer.ejs") %>

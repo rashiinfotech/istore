@@ -1,4 +1,26 @@
 <%- include ("header.ejs") %>
 
-<p1>wallet</p1>
+<h1>Wallet</h1>
+
+<div class="wallet-info">
+    <p>User: <%= user.username %></p>
+    <p>Balance: <%= user.walletBalance %></p>
+</div>
+
+<div class="transaction-history">
+    <h2>Transaction History</h2>
+    <ul>
+        <% user.walletHistory.forEach(transaction => { %>
+            <li>
+                <p><strong>Transaction:</strong> <%= transaction.transaction %></p>
+                <p><strong>Amount:</strong> <%= transaction.amount %></p>
+                <p><strong>Date:</strong> <%= transaction.date %></p>
+                <% if (transaction.reason) { %>
+                    <p><strong>Reason:</strong> <%= transaction.reason %></p>
+                <% } %>
+            </li>
+        <% }); %>
+    </ul>
+</div>
+
 <%- include ("footer.ejs") %>

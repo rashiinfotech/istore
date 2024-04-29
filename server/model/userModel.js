@@ -29,6 +29,11 @@ const userSchema = new mongoose.Schema({
         type: Boolean,
         required: true,
         default: false
+    },
+      // Define the wallet field
+      wallet: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Wallet' // Assuming 'Wallet' is the name of your wallet model
     }
 });
 
