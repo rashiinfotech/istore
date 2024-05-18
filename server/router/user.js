@@ -10,15 +10,18 @@ const {
     index,
     logout,
     getProduct,
-    profile,
-    EditProfile,
-    orders,
-    address,
-    wallet,
-    coupons,
-    resetpassword,
-    UpdateProfile
+    store,
+    
 } = require('../controller/userController/userController');
+const {resetpassword,wallet,address,orders,coupons,profile,addAddress,UpdateProfile,
+    EditProfile,
+    deleteAddress,
+    setPrimaryAddress,
+    updateAddress,
+    wishlist,
+    wishlistPost,
+    wishlistDelete
+}=require('../controller/userController/profileController')
 
 const {isAuthenticated,validateSignup,validateSignupoDefine} = require('../../middelware/userAuth');
 
@@ -47,20 +50,29 @@ userRouter.get('/profile', isAuthenticated,profile)
 
 userRouter.get('/edit-profile', isAuthenticated,EditProfile)
 userRouter.post('/update-profile', validateSignupoDefine,validateSignup,UpdateProfile)
-
+userRouter.post('/add-address',isAuthenticated,addAddress)
+userRouter.delete('/addresses/:addressId',isAuthenticated, deleteAddress)
+userRouter.put('/addresses/:id/make-primary',isAuthenticated,setPrimaryAddress)
+userRouter.put('/addresses/:id/edit', isAuthenticated, updateAddress);
 userRouter.get('/orders', isAuthenticated,orders)
 userRouter.get('/resetpassword', isAuthenticated,resetpassword)
 userRouter.get('/coupons', isAuthenticated,coupons)
 userRouter.get('/wallet', isAuthenticated,wallet)
+userRouter.get('/wishlist',isAuthenticated,wishlist)
+userRouter.post('/wishlist/:userId',isAuthenticated,wishlistPost)
+userRouter.post('/wishlist/:userId/delete/:itemId',isAuthenticated,wishlistDelete)
+
+
 userRouter.get('/address', isAuthenticated,address)
 
+userRouter.get('/store',store);
 
 
 
 
-userRouter.get('/store', (req, res) => {
-    res.render('user/store');
-});
+// userRouter.get('/store', (req, res) => {
+//     res.render('user/store');
+// });
 
 userRouter.get('/x', (req, res) => {
     res.render('user/blank');

@@ -1,5 +1,7 @@
-<%- include ('header.ejs') %>
+<!DOCTYPE html>
+<html lang="en">
 <head>
+    <%- include('header.ejs') %>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Address Book</title>
@@ -39,101 +41,250 @@
 </head>
 <body>
     <header>
-        <!-- Header content -->
         <nav class="navbar navbar-expand-lg navbar-light bg-light">
-          
+            <!-- Navigation content -->
         </nav>
     </header>
 
     <div class="container">
         <div class="content">
-            <div class="address-card" id="address-card">
+            <div class="address-card" id="primary-address">
                 <h2>Primary Address</h2>
-                <p><strong>Name:</strong> <span id="name"></span></p>
-                <p><strong>Street:</strong> <span id="street"></span></p>
-                <p><strong>City:</strong> <span id="city"></span></p>
-                <p><strong>State:</strong> <span id="state"></span></p>
-                <p><strong>ZIP:</strong> <span id="zip"></span></p>
-                <p><strong>Country:</strong> <span id="country"></span></p>
+                <% if (addresses && addresses.length > 0) { %>
+                    <% addresses.forEach(address => { %>
+                        <% if (address.active) { %>
+                            <p><strong>AddressLine1:</strong> <%= address.addressLine1 %></p>
+                            <p><strong>Street:</strong> <%= address.street %></p>
+                            <p><strong>City:</strong> <%= address.city %></p>
+                            <p><strong>State:</strong> <%= address.state %></p>
+                            <p><strong>Pincode:</strong> <%= address.ZIP %></p>
+                            <p><strong>Country:</strong> <%= address.country %></p>
+                            <button type="button" class="btn btn-secondary" onclick="window.editAddress('<%= address._id %>')">Edit</button>
+
+                            <button type="button" class="btn btn-danger" onclick="confirmDelete('<%= address._id %>')">Delete</button>
+                        <% } %>
+                    <% }); %>
+                <% } else { %>
+                    <p>No primary address found.</p>
+                <% } %>
             </div>
 
-            <!-- Bootstrap modal for adding new address -->
-            <div class="modal" id="addAddressModal">
+            <h2>Secondary Address</h2>
+            <% if (addresses && addresses.length > 0) { %>
+                <% addresses.forEach(address => { %>
+                    <% if (!address.active) { %>
+                        <div class="address-card">
+                            <p><strong>AddressLine1:</strong> <%= address.addressLine1 %></p>
+                            <p><strong>Street:</strong> <%= address.street %></p>
+                            <p><strong>City:</strong> <%= address.city %></p>
+                            <p><strong>State:</strong> <%= address.state %></p>
+                            <p><strong>Pincode:</strong> <%= address.ZIP %></p>
+                            <p><strong>Country:</strong> <%= address.country %></p>
+                            <button type="button" class="btn btn-secondary" onclick="makePrimary('<%= address._id %>')">Set as Primary</button>
+                            <button type="button" class="btn btn-secondary" onclick="window.editAddress('<%= address._id %>')">Edit</button>
+
+                            <button type="button" class="btn btn-danger" onclick="confirmDelete('<%= address._id %>')">Delete</button>
+                        </div>
+                    <% } %>
+                <% }); %>
+            <% } else { %>
+                <p>No secondary addresses found.</p>
+            <% } %>
+
+            <div class="modal" id="editAddressModal">
                 <div class="modal-dialog">
                     <div class="modal-content">
                         <div class="modal-header">
-                            <h5 class="modal-title">Add New Address</h5>
+                            <h5 class="modal-title">Edit Address</h5>
                             <button type="button" class="close" data-dismiss="modal">&times;</button>
                         </div>
                         <div class="modal-body">
                             <form id="address-form">
                                 <div class="form-group">
-                                    <label for="name">Name:</label>
-                                    <input type="text" id="name-input" name="name" class="form-control">
+                                    <label for="addressLine1">AddressLine1:</label>
+                                    <input type="text" id="edit-name-input" name="addressLine1" class="form-control">
                                 </div>
                                 <div class="form-group">
                                     <label for="street">Street:</label>
-                                    <input type="text" id="street-input" name="street" class="form-control">
+                                    <input type="text" id="edit-street-input" name="street" class="form-control">
                                 </div>
                                 <div class="form-group">
                                     <label for="city">City:</label>
-                                    <input type="text" id="city-input" name="city" class="form-control">
+                                    <input type="text" id="edit-city-input" name="city" class="form-control">
                                 </div>
                                 <div class="form-group">
                                     <label for="state">State:</label>
-                                    <input type="text" id="state-input" name="state" class="form-control">
+                                    <input type="text" id="edit-state-input" name="state" class="form-control">
                                 </div>
                                 <div class="form-group">
-                                    <label for="zip">ZIP:</label>
-                                    <input type="text" id="zip-input" name="zip" class="form-control">
+                                    <label for="ZIP">Pincode:</label>
+                                    <input type="text" id="edit-ZIP-input" name="ZIP" class="form-control">
                                 </div>
                                 <div class="form-group">
                                     <label for="country">Country:</label>
-                                    <input type="text" id="country-input" name="country" class="form-control">
+                                    <input type="text" id="edit-country-input" name="country" class="form-control">
                                 </div>
                             </form>
                         </div>
                         <div class="modal-footer">
-                            <button type="button" class="btn btn-primary" onclick="addAddress()">Submit</button>
+                            <button type="button" class="btn btn-primary" id="save-address-btn">Save</button>
                             <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addAddressModal">Add New Address</button>
+            <button type="button" class="btn btn-primary" id="add-address-btn">Add Address</button>
         </div>
     </div>
 
     <footer class="footer mt-auto py-3 bg-light">
-        <!-- Footer content -->
         <div class="container text-center">
-          
+            <!-- Footer text -->
         </div>
-        <%- include ("footer.ejs") %>
+        <%- include('footer.ejs') %>
     </footer>
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script>
-        function addAddress() {
-            var name = document.getElementById("name-input").value;
-            var street = document.getElementById("street-input").value;
-            var city = document.getElementById("city-input").value;
-            var state = document.getElementById("state-input").value;
-            var zip = document.getElementById("zip-input").value;
-            var country = document.getElementById("country-input").value;
+        $(document).ready(function() {
+            window.editAddress = function(addressId) {
+                $.ajax({
+                    url: '/addresses/' + addressId,
+                    type: 'GET',
+                    success: function(response) {
+                        const address = response.address;
+                        $('#edit-name-input').val(address.addressLine1);
+                        $('#edit-street-input').val(address.street);
+                        $('#edit-city-input').val(address.city);
+                        $('#edit-state-input').val(address.state);
+                        $('#edit-ZIP-input').val(address.ZIP);
+                        $('#edit-country-input').val(address.country);
+                        $('#editAddressModal').modal('show');
+                        $('#save-address-btn').off('click').on('click', function() {
+                            window.saveAddress(addressId);
+                        });
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Error fetching address:', error);
+                    }
+                });
+            };
 
-            document.getElementById("name").textContent = name;
-            document.getElementById("street").textContent = street;
-            document.getElementById("city").textContent = city;
-            document.getElementById("state").textContent = state;
-            document.getElementById("zip").textContent = zip;
-            document.getElementById("country").textContent = country;
+            window.saveAddress = function(addressId) {
+                var addressLine1 = $('#edit-name-input').val();
+                var street = $('#edit-street-input').val();
+                var city = $('#edit-city-input').val();
+                var state = $('#edit-state-input').val();
+                var ZIP = $('#edit-ZIP-input').val();
+                var country = $('#edit-country-input').val();
 
-            $('#addAddressModal').modal('hide');
-        }
+                var addressData = {
+                    addressLine1: addressLine1,
+                    street: street,
+                    city: city,
+                    state: state,
+                    ZIP: ZIP,
+                    country: country
+                };
+
+                $.ajax({
+                    url: '/addresses/' + addressId + '/edit',
+                    type: 'PUT',
+                    contentType: 'application/json',
+                    data: JSON.stringify(addressData),
+                    success: function(response) {
+                        console.log('Address updated successfully');
+                        location.reload();
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Error updating address:', error);
+                        alert("Error updating address: " + error);
+                    }
+                });
+            };
+
+            window.addAddress = function() {
+                var addressLine1 = $('#edit-name-input').val();
+                var street = $('#edit-street-input').val();
+                var city = $('#edit-city-input').val();
+                var state = $('#edit-state-input').val();
+                var ZIP = $('#edit-ZIP-input').val();
+                var country = $('#edit-country-input').val();
+
+                var addressData = {
+                    addressLine1: addressLine1,
+                    street: street,
+                    city: city,
+                    state: state,
+                    ZIP: ZIP,
+                    country: country
+                };
+
+                $.ajax({
+                    url: '/add-address',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(addressData),
+                    success: function(response) {
+                        console.log('Address added successfully');
+                        location.reload();
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Error adding address:', error);
+                        alert("Error adding address: " + error);
+                    }
+                });
+            };
+
+            $('#add-address-btn').click(function() {
+                // Clear previous input values
+                $('#edit-name-input').val('');
+                $('#edit-street-input').val('');
+                $('#edit-city-input').val('');
+                $('#edit-state-input').val('');
+                $('#edit-ZIP-input').val('');
+                $('#edit-country-input').val('');
+
+                $('#editAddressModal').modal('show');
+                $('#save-address-btn').off('click').on('click', function() {
+                    window.addAddress();
+                });
+            });
+
+            window.makePrimary = function(addressId) {
+                $.ajax({
+                    url: '/addresses/' + addressId + '/make-primary',
+                    type: 'PUT',
+                    contentType: 'application/json',
+                    success: function(response) {
+                        console.log('Address marked as primary successfully');
+                        location.reload();
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Error marking address as primary:', error);
+                    }
+                });
+            };
+
+            window.confirmDelete = function(addressId) {
+                if (confirm("Are you sure you want to delete this address?")) {
+                    $.ajax({
+                        url: '/addresses/' + addressId,
+                        type: 'DELETE',
+                        success: function(response) {
+                            console.log('Address deleted successfully');
+                            location.reload();
+                        },
+                        error: function(xhr, status, error) {
+                            console.error('Error deleting address:', error);
+                        }
+                    });
+                }
+            };
+        });
     </script>
 </body>
 </html>

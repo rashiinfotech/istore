@@ -239,8 +239,41 @@ const index = async (req, res) => {
         // Find only the active products
         const products = await productModel.find({ status: true }).populate('category', 'name');
         const categories = await Category.find();
+        const isAuthenticated = req.isAuthenticated;
+        const user = isAuthenticated ? req.userDetails : null;
+        const userName =isAuthenticated ? (req.userDetails ? req.userDetails.username : null) : null;
 
         res.render('user/index', { 
+            products, 
+            categories, 
+            isAuthenticated,
+            user,
+            userName // Pass user details only if authenticated
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Internal Server Error');
+    }
+};
+
+
+
+
+
+const store=async (req, res) => {
+    try {
+        const page = req.query.page || 1;
+        const limit = 10; // Adjust the limit as per your requirement
+        const skip = (page - 1) * limit;
+
+        // Find only the active products
+        const products = await productModel.find({ status: true })
+            .populate('category', 'name')
+            .skip(skip)
+            .limit(limit);
+        const categories = await Category.find();
+
+        res.render('user/store', { 
             products, 
             categories, 
             isAuthenticated: req.isAuthenticated,
@@ -253,9 +286,6 @@ const index = async (req, res) => {
         res.status(500).send('Internal Server Error');
     }
 };
-
-
-
 
 
 const logout = (req, res) => {
@@ -312,200 +342,28 @@ const getProduct = async (req, res) => {
     }
 };
 
-const profile = async (req, res) => {
-    try {
-        // Assuming you have a UserModel for managing user data
-        const userId = req.session.userId; // Assuming you have authenticated users
-        const user = await User.findById(userId);
-        const categories = await Category.find();
-        const address = await Address.find();
-
-        if (!user) {
-            // If user not found, handle it appropriately (e.g., redirect to login page)
-            return res.redirect('/login');
-        }
-
-        // Render the edit-profile template with the user's data and isAuthenticated variable
-        res.render('user/profile', { user, isAuthenticated: req.isAuthenticated,categories,address  });
-    } catch (error) {
-        console.error('Error fetching user profile:', error);
-        // Handle errors (e.g., render an error page)
-        res.status(500).send('Internal Server Error');
-    }
-};
-const EditProfile= async (req, res) => {
-    try {
-        // Assuming you have a UserModel for managing user data
-        const userId = req.session.userId; // Assuming you have authenticated users
-        const user = await User.findById(userId);
-        const categories = await Category.find();
-        const address = await Address.find();
-
-        if (!user) {
-            // If user not found, handle it appropriately (e.g., redirect to login page)
-            return res.redirect('/login');
-        }
-
-        // Render the edit-profile template with the user's data and isAuthenticated variable
-        res.render('user/Edit-profile', { user, isAuthenticated: req.isAuthenticated,categories,address  });
-    } catch (error) {
-        console.error('Error fetching user profile:', error);
-        // Handle errors (e.g., render an error page)
-        res.status(500).send('Internal Server Error');
-    }
-}; 
 
 
 
 
 
 
-const orders = async (req, res) => {
-    try {
-        // Validate request body
-        if (!req.body.amount || !req.body.payment) {
-            throw new Error('Amount and payment are required fields.');
-        }
 
-        const userId = req.session.userId;
-        const user = await User.findById(userId);
-        const categories = await Category.find();
-        const address = await Address.find();
-
-        if (!user) {
-            return res.redirect('/login');
-        }
-
-        const newOrder = new Order({
-            userId: userId,
-            orderId: shortid.generate(),
-            items: req.body.items,
-            wallet: req.body.wallet,
-            status: 'pending',
-            address: req.body.address,
-            amount: req.body.amount,
-            payment: req.body.payment,
-            createdAt: new Date(),
-            updated: new Date()
-        });
-
-        await newOrder.save();
-
-        res.render('user/My-order', { user, isAuthenticated: req.isAuthenticated, categories, address });
-    } catch (error) {
-        console.error('Error creating new order:', error);
-        res.status(500).send('Internal Server Error');
-    }
-};
-
-
-const address= async (req, res) => {
-    try {
-        // Assuming you have a UserModel for managing user data
-        const userId = req.session.userId; // Assuming you have authenticated users
-        const user = await User.findById(userId);
-        const categories = await Category.find();
-        const address = await Address.find();
-
-        if (!user) {
-            // If user not found, handle it appropriately (e.g., redirect to login page)
-            return res.redirect('/login');
-        }
-
-        // Render the edit-profile template with the user's data and isAuthenticated variable
-        res.render('user/Address', { user, isAuthenticated: req.isAuthenticated,categories,address  });
-    } catch (error) {
-        console.error('Error fetching user profile:', error);
-        // Handle errors (e.g., render an error page)
-        res.status(500).send('Internal Server Error');
-    }
-}; 
-const wallet = async (req, res) => {
-    try {
-        const userId = req.session.userId;
-        const user = await User.findById(userId).populate('wallet.history'); // Populate the wallet history
-        const categories = await Category.find();
-        const address = await Address.find();
-
-        if (!user) {
-            return res.redirect('/login');
-        }
-
-        res.render('user/Wallet', { user, isAuthenticated: req.isAuthenticated, categories, address });
-    } catch (error) {
-        console.error('Error fetching user profile:', error);
-        res.status(500).send('Internal Server Error');
-    }
-};
-
-
-
-
-const coupons= async (req, res) => {
-    try {
-        // Assuming you have a UserModel for managing user data
-        const userId = req.session.userId; // Assuming you have authenticated users
-        const user = await User.findById(userId);
-        const categories = await Category.find();
-        const address = await Address.find();
-
-        if (!user) {
-            // If user not found, handle it appropriately (e.g., redirect to login page)
-            return res.redirect('/login');
-        }
-
-        // Fetch coupons data from the database
-        const coupons = await Coupon.find(); // Assuming Coupon is your Mongoose model for coupons
-
-        // Render the Coupons template with the user's data, isAuthenticated variable, and coupons data
-        res.render('user/Coupons', { user, isAuthenticated: req.isAuthenticated, categories, address, coupons });
-    } catch (error) {
-        console.error('Error fetching user profile:', error);
-        // Handle errors (e.g., render an error page)
-        res.status(500).send('Internal Server Error');
-    }
-};
-
-const resetpassword= async (req, res) => {
-    try {
-        // Assuming you have a UserModel for managing user data
-        const userId = req.session.userId; // Assuming you have authenticated users
-        const user = await User.findById(userId);
-        const categories = await Category.find();
-        const address = await Address.find();
-
-        if (!user) {
-            // If user not found, handle it appropriately (e.g., redirect to login page)
-            return res.redirect('/login');
-        }
-
-        // Render the edit-profile template with the user's data and isAuthenticated variable
-        res.render('user/Reset-password', { user, isAuthenticated: req.isAuthenticated,categories,address  });
-    } catch (error) {
-        console.error('Error fetching user profile:', error);
-        // Handle errors (e.g., render an error page)
-        res.status(500).send('Internal Server Error');
-    }
-};
-const UpdateProfile= (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() });
-    }
-
-    // Update user's profile in the database
-    // Example:
-    const { username, email, phone } = req.body;
-    // Update logic here
-
-    res.send('Profile updated successfully');
-};
+    
 
 
 
 //req.session.isAuth
 
 
-module.exports = { validateSignup, signupPost, signupGet, loginPost, loginGet
-    ,index,logout,getProduct,EditProfile,orders,profile,address,wallet,
-    coupons,resetpassword,UpdateProfile};
+module.exports = { 
+    validateSignup,
+     signupPost, 
+     signupGet,
+     loginPost,
+    loginGet
+    ,index,
+    logout,
+    getProduct,
+    store,
+    };

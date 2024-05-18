@@ -90,9 +90,11 @@ const submitItems = async (req, res) => {
                     });
         
                     await newProduct.save();
+                    const Products = await productModel.find();
                     req.session.successMessage = 'Product added successfully';
-                    return res.render('admin/add-item', {
+                    return res.render('admin/items-list', {
                         user: req.session.user,
+                        Products,
                         successMessage: req.session.successMessage,
                         errorMessage: null,
                         categories,

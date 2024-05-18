@@ -1,4 +1,36 @@
 <%- include ("header.ejs") %>
 
-<p1>wishlist</p1>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Wishlist</title>
+    <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+    <h1>Wishlist</h1>
+    <ul>
+        <% if (wishlist && wishlist.items.length > 0) { %>
+            <% wishlist.items.forEach(item => { %>
+                <li>
+                    <%= item.productId.name %> - Size: <%= item.size %>
+                    <form action="/wishlist/<%= wishlist.userId %>/delete/<%= item._id %>" method="POST" style="display: inline;">
+                        <button type="submit">Remove</button>
+                    </form>
+                </li>
+            <% }) %>
+        <% } else { %>
+            <li>No items in your wishlist.</li>
+        <% } %>
+    </ul>
+
+    <form action="/wishlist/<%= wishlist.userId %>" method="POST">
+        <label for="productId">Product ID:</label>
+        <input type="text" name="productId" required>
+        <label for="size">Size:</label>
+        <input type="text" name="size">
+        <button type="submit">Add to Wishlist</button>
+    </form>
+</body>
+</html>
+
 <%- include ("footer.ejs") %>

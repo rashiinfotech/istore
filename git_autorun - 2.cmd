@@ -1,5 +1,5 @@
 
 
 # Commit changes with today's date as the commit message
-git commit -m "$(date +'%Y-%m-%d')"
+git commit -m "week 9 29th"
 
