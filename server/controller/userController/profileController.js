@@ -62,8 +62,8 @@ const addAddress = async (req, res) => {
         const { addressLine1, street, city, state, ZIP, country } = req.body;
         const userId = req.userDetails._id;
 
-        // Set all existing addresses for the user to inactive
-        await Address.updateMany({ userId }, { $set: { active: false } });
+        // Find all addresses of the user and update their active status to false
+        await Address.updateMany({ userId }, { active: false });
 
         // Create a new address document
         const newAddress = new Address({
@@ -73,20 +73,20 @@ const addAddress = async (req, res) => {
             state,
             ZIP,
             country,
-            userId,
-            isActive: true // Mark the new address as active
+            userId // Assuming you have a user object attached to the request
         });
         
         // Save the new address to the database
         const savedAddress = await newAddress.save();
 
-        // Send a response with the success message and the saved address details
+        // Redirect the user to the address page or send a response
         res.status(201).json({ message: "Address added successfully", address: savedAddress });
     } catch (error) {
         console.error('Error adding address:', error);
         res.status(500).json({ error: 'Internal server error' });
     }
 };
+
 
 
 
@@ -110,34 +110,33 @@ const deleteAddress = async (req, res) => {
         res.status(500).json({ error: 'Internal server error' });
     }
 };
+
 const setPrimaryAddress = async (req, res) => {
     try {
-        const addressId = req.params.id; // Corrected from req.params.addressId to req.params.id
+        const addressId = req.params.id;
         const userId = req.userDetails._id;
-        console.log("Reached set as primary: " + addressId);
+        console.log("Reached set as primary: ", addressId, " for user: ", userId);
 
-        // Set all existing addresses for the user to inactive
         await Address.updateMany({ userId }, { $set: { active: false } });
 
-        // Set the selected address as active
         const updatedAddress = await Address.findByIdAndUpdate(
             addressId,
             { $set: { active: true } },
-            { new: true } // Return the updated document
+            { new: true }
         );
 
-        // Check if the address exists and belongs to the user
         if (!updatedAddress || updatedAddress.userId.toString() !== userId.toString()) {
+            console.error('Address not found or does not belong to the user');
             return res.status(404).json({ error: 'Address not found or does not belong to the user' });
         }
 
-        // Send a response with the success message and the updated address details
         res.status(200).json({ message: "Address set as primary successfully", address: updatedAddress });
     } catch (error) {
         console.error('Error setting address as primary:', error);
         res.status(500).json({ error: 'Internal server error' });
     }
 };
+
 const updateAddress = async (req, res) => {
     try {
         const addressId = req.params.id;
@@ -165,9 +164,15 @@ const updateAddress = async (req, res) => {
     }
 };
 
-
-
-module.exports = { updateAddress };
+const wishlist= async (req, res) => {
+    const userId = req.params.userId;
+    try {
+        const wishlist = await Wishlist.findOne({ userId }).populate('items.productId').exec();
+        res.render('wishlist', { wishlist });
+    } catch (err) {
+        res.status(500).send(err);
+    }
+};
 
 
 
@@ -327,17 +332,6 @@ const resetpassword= async (req, res) => {
         res.status(500).send('Internal Server Error');
     }
 };
-
-const wishlist= async (req, res) => {
-    //const userId = req.params.userId;
-    try {
-        const wishlist = await Wishlist.findOne({ userId }).populate('items.productId').exec();
-        res.render('user/wishlist',{ user, isAuthenticated: req.isAuthenticated, categories, address });
-    } catch (err) {
-        res.status(500).send(err);
-    }
-};
-
 const wishlistPost=async (req, res) => {
     const userId = req.params.userId;
     const { productId, size } = req.body;
