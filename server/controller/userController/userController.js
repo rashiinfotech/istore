@@ -28,7 +28,7 @@ const validateSignup = [
     body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters long'),
 ];
 const signupPost = async (req, res) => {
-    console.log('Received form data:', req.body);
+    console.log('Received form data:................', req.body);
 
     const errors = validationResult(req);
 
@@ -215,16 +215,16 @@ const loginPost = async (req, res) => {
             req.session.isAuth = true;
             console.log("success");
 
-            // Redirect the user to the intended URL or homepage if not specified
-            res.redirect(req.session.returnTo || '/');
+            // Send JSON response instead of redirecting
+            res.json({ message: 'Login successful', redirectTo: '/' });
         } else {
-            req.flash('invalidpassword', "Invalid Email or Password");
-            res.redirect('/login');
+            // Send JSON response for invalid credentials
+            res.status(401).json({ error: 'Invalid Email or Password' });
         }
     } catch (error) {
         console.error('Error during login:', error);
-        req.flash('invaliduser', "Invalid Email or Password");
-        res.redirect('/login');
+        // Send JSON response for server error
+        res.status(500).json({ error: 'An error occurred during login' });
     }
 };
 
@@ -347,13 +347,9 @@ const getProduct = async (req, res) => {
 
 
 
-
-
     
 
 
-
-//req.session.isAuth
 
 
 module.exports = { 
@@ -366,4 +362,5 @@ module.exports = {
     logout,
     getProduct,
     store,
-    };
+   
+};

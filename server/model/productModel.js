@@ -18,16 +18,10 @@ const productSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    
     stock: {
-            type: Number,
-            required: true,
-        }
-    ,
-    // totalstock: {
-    //     type: Number,
-    //     required: true,
-    // },
+        type: Number,
+        required: true,
+    },
     image: {
         type: Array,
         required: true,
@@ -38,7 +32,11 @@ const productSchema = new mongoose.Schema({
     }
 });
 
-
 const productModel = mongoose.model('productDetails', productSchema);
 
 module.exports = productModel;
+
+
+// const Product = mongoose.model('Product', productSchema); // Change the model name to 'Product'
+
+// module.exports = Product;

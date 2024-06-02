@@ -1,221 +1,180 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html class="no-js" lang="en">
 
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Your Title Here</title>
-    <style>
-        body {
-            background-image: url("/views/background-img.png");
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            background-size: cover;
-            background-repeat: no-repeat;
-        }
+  <meta charset="utf-8">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <title>User Login</title>
+  <meta name="description" content="">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="apple-touch-icon" href="apple-touch-icon.html">
+  <!-- Place favicon.ico in the root directory -->
+  <link rel="stylesheet" href="../../static/css/vendor.css">
+  <link rel="stylesheet" href="../../static/css/app.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 
-        .container {
-            text-align: center;
-        }
+  <!-- Theme initialization -->
+  <script>
+    var themeSettings = (localStorage.getItem('themeSettings')) ? JSON.parse(localStorage.getItem('themeSettings')) : {};
+    var themeName = themeSettings.themeName || '';
+    if (themeName) {
+      document.write('<link rel="stylesheet" id="theme-style" href="../../static/css/app.css">');
+    } else {
+      document.write('<link rel="stylesheet" id="theme-style" href="../../static/css/app.css">');
+    }
+  </script>
 
-        #adminButton {
-            background-color: #0056b3;
-            color: #ffffff;
-            padding: 10px 15px;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            position: fixed;
-            top: 10px;
-            right: 10px;
-        }
+  <style>
+    .logo img {
+      width: 120px;
+      height: auto;
+      vertical-align: middle;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 150px;
+    }
 
-        #adminButton:hover {
-            background-color: #00274d;
-        }
+    .auth-title {
+      display: flex;
+      justify-content: center;
+      gap: 90px;
+      margin-top: 100px;
+    }
 
-        form {
-            background-color: #313143;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            width: 300px;
-            margin: 0 auto;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 8px;
-        }
-
-        input {
-            width: calc(100% - 16px);
-            padding: 8px;
-            margin-bottom: 16px;
-            box-sizing: border-box;
-        }
-
-        button {
-            background-color: #007bff;
-            color: #ffffff;
-            padding: 10px 15px;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-        }
-
-        header {
-            color: #ffffff;
-        }
-
-        button:hover {
-            background-color: #0056b3;
-        }
-
-        .signup-text {
-            color: #ffffff;
-            font-weight: bold;
-            display: inline-block;
-            margin-top: 10px;
-            margin-right: 5px;
-        }
-        
-        
-
-        .signup-lite {
-            color: #ffffff;
-            /* font-weight: bold; */
-            display: inline-block;
-            margin-top: 10px;
-            margin-right: 5px;
-        }
-        .signup-hover {
-            color: #ffffff;
-            /* font-weight: bold; */
-            display: inline-block;
-            margin-top: 10px;
-            margin-right: 5px;
-        }
-        .signup-hover:hover {
-            color: #7e6565;
-            /* font-weight: bold; */
-            display: inline-block;
-            margin-top: 10px;
-            margin-right: 5px;
-        }
-
-
-        a.signup-button {
-            text-decoration: none;
-            font-weight: bold;
-            color: #ffffff;
-            background-color: #007bff;
-            padding: 10px 15px;
-            border-radius: 10px;
-            cursor: pointer;
-            display: inline-block;
-            margin-top: 10px;
-        }
-
-        a.signup-button:hover {
-            background-color: #00274d;
-        }
-
-        .header-logo {
-    display: flex;
-    align-items: center; /* Vertical centering */
-}
-
-.header-logo .logo img {
-    display: block;
-    margin: auto; /* Center horizontally */
-    max-width: 60%;
-    max-height: 60%;
-}
-
-    </style>
+    .auth-title .title-text {
+      margin-top: 1500px;
+    }
+  </style>
 </head>
 
 <body>
-    <div class="container">
-        <header>
-
-        </header>
-
-        <!-- Admin Button -->
-        <!-- <button id="adminButton" onclick="redirectToAdminLogin()">Admin Login</button> -->
-
-        <form id="userLoginForm" action="/login" method="POST">
-            <div class="header-logo">
-                <a href="/" class="logo">
-                    <img src="../../static/img/logo.png" alt=""><br>
-                </a>
+  <div class="auth">
+    <div class="auth-container">
+      <div class="card">
+        <header class="auth-header">
+          <h1 class="auth-title">
+            <div class="logo">
+              <img src="../../static/img/logo black small .png" alt="Logo">
             </div>
-            <h1 class="signup-text" > Login</h1><br>
-            <label class="signup-lite"  for="userEmail">Email</label>
-            <input type="email" id="userEmail" name="email" required />
-
-            <label class="signup-lite"  for="userPassword">Password</label>
-            <input type="password" id="userPassword" name="password" required />
-            <br><br>
-            <button type="submit">Login</button><br>
-            <br><br><br>
-            <p class="signup-text">Didn't have an account?</p>
-            <a href="/signup" class="signup-button">Sign Up</a><br>
-            <p class="signup-text">Forgot Password?</p>
-            <a class="signup-hover" href="/" class="">Reset</a>
-            <br><br><br><br><
-        </form>
-
-
+            User Login
+          </h1>
+        </header>
+        <div class="auth-content">
+          <p class="text-center">LOGIN TO CONTINUE</p>
+          <form id="login-form" action="/login" method="POST">
+            <div class="form-group">
+              <label for="username">Username</label>
+              <input type="email" class="form-control underlined" name="username" id="username" placeholder="Your email address" required autocomplete="username">
+            </div>
+            <div class="form-group">
+              <label for="password">Password</label>
+              <input type="password" class="form-control underlined" name="password" id="password" placeholder="Your password" required autocomplete="current-password">
+            </div>
+            <div class="form-group">
+              <label for="remember">
+                <input class="checkbox" id="remember" type="checkbox">
+                <span>Remember me</span>
+              </label>
+              <a href="/resetpassword" class="forgot-btn pull-right">Forgot password?</a>
+            </div>
+            <div class="form-group">
+              <button type="submit" class="btn btn-block btn-primary">Login</button>
+            </div>
+            <div class="form-group">
+              <p class="text-muted text-center">Do not have an account?
+                <a href="/signup">Sign Up!</a>
+              </p>
+            </div>
+          </form>
+        </div>
+      </div>
+      <div class="text-center">
+        <a href="/" class="btn btn-secondary btn-sm">
+          <i class="fa fa-arrow-left"></i> Back to Home
+        </a>
+      </div>
     </div>
+  </div>
+  <!-- Reference block for JS -->
+  <div class="ref" id="ref">
+    <div class="color-primary"></div>
+    <div class="chart">
+      <div class="color-primary"></div>
+      <div class="color-secondary"></div>
+    </div>
+  </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const userLoginForm = document.getElementById('userLoginForm');
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const userLoginForm = document.getElementById('login-form');
+      let isSubmitting = false;
 
-            userLoginForm.addEventListener('submit', async function (event) {
-                event.preventDefault();
+      userLoginForm.addEventListener('submit', async function (event) {
+        event.preventDefault();
 
-                const enteredUsername = document.getElementById('userEmail').value;
-                const enteredPassword = document.getElementById('userPassword').value;
+        if (isSubmitting) return;
 
-                try {
-                    const response = await fetch('/login', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            email: enteredUsername,
-                            password: enteredPassword,
-                        }),
-                    });
+        isSubmitting = true;
 
-                    const responseData = await response.json();
+        const enteredUsername = document.getElementById('username').value;
+        const enteredPassword = document.getElementById('password').value;
 
-                    if (response.ok) {
-                        // Redirect to the dashboard upon successful login
-                        window.location.href = "/user/cart";
-                    } else {
-                        alert(responseData.error || "Invalid credentials");
-                    }
-                }
-                //  catch (error) {
-                //     console.error('Error during login:', error);
-                //     alert('An error occurred during login');
-                // }
+        try {
+          const response = await fetch('/login', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              email: enteredUsername,
+              password: enteredPassword,
+            }),
+          });
+
+          const contentType = response.headers.get('Content-Type');
+          if (contentType && contentType.includes('application/json')) {
+            const responseData = await response.json();
+
+            if (response.ok) {
+              Swal.fire({
+                icon: 'success',
+                title: 'Login successful',
+                showConfirmButton: false,
+                timer: 1500
+              }).then(() => {
+                window.location.href = responseData.redirectTo || "/";
+              });
+            } else {
+              Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: responseData.error || "Invalid credentials"
+              });
+            }
+          } else {
+            const text = await response.text();
+            console.error('Unexpected response format:', text);
+            Swal.fire({
+              icon: 'error',
+              title: 'An error occurred during login',
+              text: 'Unexpected response format'
             });
-        });
-
-       
-    </script>
+          }
+        } catch (error) {
+          console.error('Error during login:', error);
+          Swal.fire({
+            icon: 'error',
+            title: 'An error occurred during login',
+            text: error.message
+          });
+        } finally {
+          isSubmitting = false;
+        }
+      });
+    });
+  </script>
 
 </body>
 

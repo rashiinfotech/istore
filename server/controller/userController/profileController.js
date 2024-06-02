@@ -12,9 +12,10 @@ const Address = require('../../model/addressModel');
 const Category = require('../../model/categoryModel');
 // const { sendOTP } = require('../controller/userController/otpController');
 const isAuthenticated = require('../../../middelware/userAuth'); // Import the isAuthenticated function
-const Order = require('../../model/orderModel');
+
 const shortid = require('shortid');
 const Coupon = require('../../model/couponModel');
+const Wishlist = require('../../model/wishlistModel'); 
 
 
 
@@ -41,31 +42,58 @@ const EditProfile= async (req, res) => {
         res.status(500).send('Internal Server Error');
     }
 }; 
-const UpdateProfile= (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() });
+// Update profile handler
+// Profile update function
+const UpdateProfile = async (req, res) => {
+    const { userId, username, email, phone } = req.body;
+
+    try {
+        // Find the user by ID and update the profile details
+        const user = await User.findByIdAndUpdate(userId, {
+            username,
+            email,
+            phone
+        }, { new: true, runValidators: true });
+
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: 'User not found'
+            });
+        }
+
+        return res.json({
+            success: true,
+            message: 'Profile updated successfully',
+            user
+        });
+    } catch (error) {
+        if (error.code === 11000) {
+            return res.status(400).json({
+                success: false,
+                errors: [{ msg: 'Email already exists' }]
+            });
+        }
+        return res.status(500).json({
+            success: false,
+            message: 'An error occurred while updating the profile',
+            error: error.message
+        });
     }
-
-    // Update user's profile in the database
-    // Example:
-    const { username, email, phone } = req.body;
-    // Update logic here
-
-    res.send('Profile updated successfully');
 };
-
 
 const addAddress = async (req, res) => {
     try {
-        // Assuming the address data is sent in the request body
+        // Extract the address details from the request body
         const { addressLine1, street, city, state, ZIP, country } = req.body;
         const userId = req.userDetails._id;
+        console.log("reg body is........"+userId);
+  
 
-        // Find all addresses of the user and update their active status to false
+        // Update all existing addresses of the user to inactive (secondary)
         await Address.updateMany({ userId }, { active: false });
 
-        // Create a new address document
+        // Create a new address document with active status
         const newAddress = new Address({
             addressLine1,
             street,
@@ -73,19 +101,21 @@ const addAddress = async (req, res) => {
             state,
             ZIP,
             country,
-            userId // Assuming you have a user object attached to the request
+            userId,
+            active: true  // Set the new address as primary
         });
         
         // Save the new address to the database
         const savedAddress = await newAddress.save();
 
-        // Redirect the user to the address page or send a response
+        // Send a success response
         res.status(201).json({ message: "Address added successfully", address: savedAddress });
     } catch (error) {
         console.error('Error adding address:', error);
         res.status(500).json({ error: 'Internal server error' });
     }
 };
+
 
 
 
@@ -137,46 +167,124 @@ const setPrimaryAddress = async (req, res) => {
     }
 };
 
-const updateAddress = async (req, res) => {
+const getAddressById=async (req, res) => {
     try {
-        const addressId = req.params.id;
-        const userId = req.userDetails._id;
-        const { addressLine1, street, city, state, ZIP, country } = req.body;
-
-        const address = await Address.findOne({ _id: addressId, userId });
+        const address = await Address.findById(req.params.id);
         if (!address) {
-            return res.status(404).json({ error: 'Address not found or does not belong to the user' });
+            return res.status(404).json({ error: 'Address not found' });
         }
-
-        address.addressLine1 = addressLine1 || address.addressLine1;
-        address.street = street || address.street;
-        address.city = city || address.city;
-        address.state = state || address.state;
-        address.ZIP = ZIP || address.ZIP;
-        address.country = country || address.country;
-
-        const updatedAddress = await address.save();
-
-        res.status(200).json({ message: "Address updated successfully", address: updatedAddress });
+        res.status(200).json({ address });
     } catch (error) {
-        console.error('Error updating address:', error);
-        res.status(500).json({ error: 'Internal server error' });
+        res.status(500).json({ error: 'Server error' });
     }
 };
 
-const wishlist= async (req, res) => {
-    const userId = req.params.userId;
-    try {
-        const wishlist = await Wishlist.findOne({ userId }).populate('items.productId').exec();
-        res.render('wishlist', { wishlist });
-    } catch (err) {
-        res.status(500).send(err);
-    }
-};
+const updateAddress =async (req, res) => {
+        const { addressLine1, street, city, state, ZIP, country } = req.body;
+        try {
+            const address = await Address.findByIdAndUpdate(
+                req.params.id,
+                { addressLine1, street, city, state, ZIP, country },
+                { new: true, runValidators: true }
+            );
+    
+            if (!address) {
+                return res.status(404).json({ error: 'Address not found' });
+            }
+    
+            res.status(200).json({ message: 'Address updated successfully', address });
+        } catch (error) {
+            res.status(500).json({ error: 'Server error' });
+        }
+    };
+    
+const wishlist = async (req, res) => {
+        try {
+          const userId = req.session.userId;
+          console.log("wishlist le userid:", userId);
+      
+          if (!userId) {
+            return res.redirect("/login");
+          }
+      
+          const user = await User.findById(userId);
+          if (!user) {
+            return res.redirect("/login");
+          }
+      
+          const categories = await Category.find();
+          let userWishlist = await Wishlist.findOne({ userId }).populate(
+            "items.productId"
+          );
+          console.log("wishlist le userid:", userWishlist);
+      
+          if (!userWishlist) {
+            userWishlist = new Wishlist({ userId, items: [] });
+            await userWishlist.save();
+          }
+      
+          // Ensure that the items are populated
+          const products = await Promise.all(
+            userWishlist.items.map(async (item) => {
+              return await productModel.findById(item.productId);
+            })
+          );
+          console.log("products:", products);
+      
+          res.render("user/wishlist", {
+            user,
+            userId,
+            isAuthenticated: req.isAuthenticated,
+            categories,
+            wishlist: userWishlist,
+            products,
+          });
+        } catch (error) {
+          console.error("Error fetching user wishlist:", error);
+          res.status(500).send("Internal Server Error.");
+        }
+      };
+    
 
+ const addToWishlist = async (req, res) => {
+        const productId = req.params.userId; // Assuming productId is part of the route params
+      
+        const userId = req.session.userId; // Assuming user ID is stored in session
+        console.log("Reach add to wishlist:", productId, userId);
+        try {
+          // Check if the product already exists in the wishlist
+          const existingWishlist = await Wishlist.findOne({ userId });
+          if (
+            existingWishlist &&
+            existingWishlist.items.some(
+              (item) => item.productId.toString() === productId
+            )
+          ) {
+            return res
+              .status(400)
+              .json({ success: false, message: "Product already in wishlist." });
+          }
+      
+          // Add the product to the wishlist
+          if (!existingWishlist) {
+            // If no wishlist exists for the user, create a new one
+            await Wishlist.create({ userId, items: [{ productId }] });
+          } else {
+            // If wishlist already exists, update it with the new product
+            existingWishlist.items.push({ productId });
+            await existingWishlist.save();
+          }
+      
+          res.json({ success: true, message: "Product added to wishlist." });
+        } catch (error) {
+          console.error("Error adding product to wishlist:", error);
+          res.status(500).json({ success: false, message: "Internal Server Error" });
+        }
+      };
+    
+    
 
-
-
+    
 
 const profile = async (req, res) => {
     try {
@@ -184,7 +292,8 @@ const profile = async (req, res) => {
         const userId = req.session.userId; // Assuming you have authenticated users
         const user = await User.findById(userId);
         const categories = await Category.find();
-        const address = await Address.find();
+        const address = await Address.find({ userId: userId });
+      
 
         if (!user) {
             // If user not found, handle it appropriately (e.g., redirect to login page)
@@ -231,52 +340,17 @@ const coupons= async (req, res) => {
 
 
 
-const orders = async (req, res) => {
-    try {
-        // Validate request body
-        if (!req.body.amount || !req.body.payment) {
-            throw new Error('Amount and payment are required fields.');
-        }
-
-        const userId = req.session.userId;
-        const user = await User.findById(userId);
-        const categories = await Category.find();
-        const address = await Address.find();
-
-        if (!user) {
-            return res.redirect('/login');
-        }
-
-        const newOrder = new Order({
-            userId: userId,
-            orderId: shortid.generate(),
-            items: req.body.items,
-            wallet: req.body.wallet,
-            status: 'pending',
-            address: req.body.address,
-            amount: req.body.amount,
-            payment: req.body.payment,
-            createdAt: new Date(),
-            updated: new Date()
-        });
-
-        await newOrder.save();
-
-        res.render('user/My-order', { user, isAuthenticated: req.isAuthenticated, categories, address });
-    } catch (error) {
-        console.error('Error creating new order:', error);
-        res.status(500).send('Internal Server Error');
-    }
-};
 
 
-const address= async (req, res) => {
+
+const address = async (req, res) => {
     try {
         // Assuming you have a UserModel for managing user data
         const userId = req.session.userId; // Assuming you have authenticated users
         const user = await User.findById(userId);
         const categories = await Category.find();
-        const addresses = await Address.find(); // Rename the variable to "addresses"
+        // Fetch addresses only linked to the authenticated user
+        const addresses = await Address.find({ userId: userId });
 
         if (!user) {
             // If user not found, handle it appropriately (e.g., redirect to login page)
@@ -290,7 +364,8 @@ const address= async (req, res) => {
         // Handle errors (e.g., render an error page)
         res.status(500).send('Internal Server Error');
     }
-}; 
+};
+
 
 const wallet = async (req, res) => {
     try {
@@ -332,34 +407,6 @@ const resetpassword= async (req, res) => {
         res.status(500).send('Internal Server Error');
     }
 };
-const wishlistPost=async (req, res) => {
-    const userId = req.params.userId;
-    const { productId, size } = req.body;
-    
-    try {
-        let wishlist = await Wishlist.findOne({ userId });
-        if (!wishlist) {
-            wishlist = new Wishlist({ userId, items: [{ productId, size }] });
-        } else {
-            wishlist.items.push({ productId, size });
-        }
-        await wishlist.save();
-        res.redirect(`/wishlist/${userId}`);
-    } catch (err) {
-        res.status(500).send(err);
-    }
-}
-const wishlistDelete=  async (req, res) => {
-    const userId = req.params.userId;
-    const itemId = req.params.itemId;
-
-    try {
-        await Wishlist.updateOne({ userId }, { $pull: { items: { _id: itemId } } });
-        res.redirect(`/wishlist/${userId}`);
-    } catch (err) {
-        res.status(500).send(err);
-    }
-};
 
 
 
@@ -367,16 +414,15 @@ module.exports = {
     resetpassword,
     wallet,
     address,
-    orders,
     coupons,
     profile,
     addAddress,
+    getAddressById,
     UpdateProfile,
     EditProfile,
     deleteAddress,
     setPrimaryAddress,
     updateAddress,
     wishlist,
-    wishlistPost,
-    wishlistDelete
+    addToWishlist
 }

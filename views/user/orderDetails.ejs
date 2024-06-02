@@ -1,0 +1,187 @@
+<%- include("header.ejs") %>
+
+<style>
+    .order-details-container {
+        max-width: 800px;
+        margin: 50px auto;
+        padding: 20px;
+        background-color: #fff;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        border-radius: 8px;
+        font-family: Arial, sans-serif;
+    }
+    .order-details-header {
+        font-size: 28px;
+        font-weight: bold;
+        text-align: center;
+        margin-bottom: 30px;
+        color: #343a40;
+    }
+    .order-details-content {
+        font-size: 18px;
+    }
+    .order-details-content div {
+        margin-bottom: 15px;
+    }
+    .order-items-list {
+        list-style-type: none;
+        padding: 0;
+    }
+    .order-item {
+        display: flex;
+        align-items: center;
+        margin-bottom: 15px;
+        padding: 15px;
+        border: 1px solid #e9ecef;
+        border-radius: 5px;
+    }
+    .order-item img {
+        max-width: 100px;
+        margin-right: 20px;
+    }
+    .order-item-details {
+        display: flex;
+        flex-direction: column;
+    }
+    .order-item-details span {
+        margin-bottom: 5px;
+    }
+    .order-item-details a {
+        color: #007bff;
+        text-decoration: none;
+    }
+    .order-item-details a:hover {
+        text-decoration: underline;
+    }
+    .button-container {
+        text-align: center;
+        margin-top: 30px;
+    }
+    .button-container a {
+        text-decoration: none;
+        color: #fff;
+        background-color: #007bff;
+        padding: 10px 20px;
+        border-radius: 5px;
+        font-size: 16px;
+    }
+    .button-container a:hover {
+        background-color: #0056b3;
+    }
+    .button-container button {
+        background-color: #dc3545; /* Red color */
+        border: none;
+        color: white;
+        padding: 10px 20px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 16px;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+
+    .button-container button:hover {
+        background-color: #c82333; /* Darker red on hover */
+    }
+
+    /* Order status colors */
+    .order-status {
+        font-weight: bold;
+        margin-bottom: 15px;
+    }
+
+    .status-pending {
+        color: #ffc107; /* Yellow color for pending */
+    }
+
+    .status-cancelled {
+        color: #dc3545; /* Red color for cancelled */
+    }
+</style>
+
+<script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+<div class="order-details-container">
+    <div class="order-details-header">Order Details</div>
+    <div class="order-details-content">
+        <div>Order ID: <%= orderId %></div>
+        <div>Order Amount: ₹<%= order.amount %></div>
+        <div>Payment Method: <%= order.payment %></div>
+        <div>Order Date: <%= order.createdAt.toDateString() %></div>
+        <div class="order-status <%= order.status === 'Cancelled' ? 'status-cancelled' : 'status-pending' %>">
+            Order Status: <%= order.status %>
+        </div>
+        <div>Order Items:</div>
+        <ul class="order-items-list">
+            <% order.items.forEach(item => { %>
+                <% const product = products.find(p => p._id.toString() === item.productId.toString()); %>
+                <li class="order-item">
+                    <img src="/<%= product.image[0] %>" alt="<%= product.name %>">
+                    <div class="order-item-details">
+                        <span><strong>Product:</strong> <a href="/product/<%= product._id %>"><%= product.name %></a></span>
+                        <span><strong>Quantity:</strong> <%= item.quantity %></span>
+                        <span><strong>Price:</strong> ₹<%= item.price %></span>
+                    </div>
+                </li>
+            <% }); %>
+        </ul>
+    </div>
+    <div class="button-container">
+        <a href="/">Continue Shopping</a>
+        <% if (order.status !== 'Cancelled') { %>
+            <button onclick="confirmCancel()">Cancel Order</button>
+        <% } %>
+    </div>
+</div>
+
+<script>
+    function confirmCancel() {
+        swal({
+            title: "Are you sure?",
+            text: "Once cancelled, you will not be able to recover this order!",
+            icon: "warning",
+            buttons: true,
+            dangerMode: true,
+        })
+        .then((willCancel) => {
+            if (willCancel) {
+                cancelOrder();
+            } else {
+                swal("Your order is safe!", {
+                    icon: "info",
+                });
+            }
+        });
+    }
+
+    function cancelOrder() {
+    // Send a request to cancel the order
+    fetch(`/cancel-orders/<%= orderId %>`)
+    .then(response => {
+        if (response.ok) {
+            // Order successfully cancelled, show success message
+            swal("Order Cancelled!", {
+                icon: "success",
+            }).then(() => {
+                // Reload the page
+                window.location.reload();
+            });
+            // Optionally, redirect the user to a different page after cancellation
+            // window.location.href = "/cancelled";
+        } else {
+            // Order cancellation failed, show error message
+            swal("Error", "Failed to cancel order", "error");
+        }
+    })
+    .catch(error => {
+        // Handle any network or server errors
+        console.error("Error cancelling order:", error);
+        swal("Error", "Failed to cancel order", "error");
+    });
+}
+
+
+</script>
+
+<%- include("footer.ejs") %>

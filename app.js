@@ -8,8 +8,7 @@ const nocache = require("nocache");
 const adminRouter = require('./server/router/admin');
 const bodyParser = require('body-parser');
 const multer = require('multer');
-const passport = require('passport'); // Don't require it again
-
+const passport = require('passport');
 const app = express();
 const PORT = process.env.PORT || 8000;
 
@@ -25,6 +24,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // Additional middleware for parsing form data
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
 
 // Flash messages middleware
 app.use(flash());
@@ -39,8 +39,8 @@ app.use(session({
     saveUninitialized: true
 }));
 
-// Set up Passport (you don't need to require it again)
-require('./middelware/passport')(passport);
+// Set up Passport
+require('./middelware/passport')(passport); // Ensure this path is correct
 app.use(passport.initialize());
 app.use(passport.session());
 
@@ -68,18 +68,18 @@ const storage = multer.diskStorage({
     }
 });
 
-
 const fileFilter = (req, file, cb) => {
-  if (file.mimetype.startsWith('image/')) {
-      cb(null, true); // Accept the file if it's an image
-  } else {
-      cb(new Error('Only images are allowed')); // Reject the file if it's not an image
-  }
+    if (file.mimetype.startsWith('image/')) {
+        cb(null, true);
+    } else {
+        cb(new Error('Only images are allowed'));
+    }
 };
+
 const upload = multer({
-  storage: storage,
-  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB file size limit
-  fileFilter: fileFilter
+    storage: storage,
+    limits: { fileSize: 5 * 1024 * 1024 },
+    fileFilter: fileFilter
 });
 
 // Routing for user and admin

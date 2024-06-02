@@ -1,0 +1,31 @@
+<%- include ("adminHead.ejs") %>
+
+
+<div class="container">
+    <h2>User Orders</h2>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Order ID</th>
+                <th>User ID</th>
+                <th>Total Amount</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% orders.forEach(order => { %>
+            <tr>
+                <td><%= order.orderId %></td>
+                <td><%= order.userId %></td>
+                <td><%= order.amount %></td>
+                <td><%= order.status %></td>
+                <td><a href="/admin/orders/<%= order.orderId %>">View Details</a></td>
+            </tr>
+            <% }); %>
+        </tbody>
+    </table>
+</div>
+
+</body>
+</html>

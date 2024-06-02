@@ -1,5 +1,3 @@
-// userModel.js
-
 const mongoose = require('mongoose');
 
 const userSchema = new mongoose.Schema({
@@ -30,13 +28,13 @@ const userSchema = new mongoose.Schema({
         required: true,
         default: false
     },
-      // Define the wallet field
-      wallet: {
+    wallet: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Wallet' // Assuming 'Wallet' is the name of your wallet model
-    }
+    },
+    cart: [{ type: mongoose.Schema.Types.ObjectId, ref: 'CartItem' }] // Define the cart field
 });
 
-const userModel = mongoose.model('User', userSchema);
+const User = mongoose.model('User', userSchema);
 
-module.exports = userModel;
+module.exports = User;

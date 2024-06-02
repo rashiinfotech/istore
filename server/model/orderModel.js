@@ -1,11 +1,12 @@
-const mongoose = require('mongoose')
-const shortid = require('shortid')
+const mongoose = require('mongoose');
+const shortid = require('shortid');
 const Schema = mongoose.Schema;
 
-const schema = new mongoose.Schema({
+const orderSchema = new mongoose.Schema({
     userId: {
         type: Schema.Types.ObjectId,
         ref: 'userDetails',
+        required: true,
     },
     orderId: {
         type: String,
@@ -16,23 +17,20 @@ const schema = new mongoose.Schema({
         productId: {
             type: Schema.Types.ObjectId,
             ref: 'productDetails',
+            required: true,
         },
         quantity: {
             type: Number,
-            required: true,
-        },
-        size: {
-            type: String,
             required: true,
         },
         price: {
             type: Number,
             required: true,
         },
-
     }],
     wallet: {
         type: Number,
+        default: 0,
     },
     status: {
         type: String,
@@ -53,10 +51,12 @@ const schema = new mongoose.Schema({
     },
     createdAt: {
         type: Date,
+        default: Date.now,
         required: true
     },
     updated: {
         type: Date,
+        default: Date.now,
         required: true
     },
     return: [{
@@ -68,9 +68,8 @@ const schema = new mongoose.Schema({
             default: 'Pending'
         }
     }]
-})
+});
 
+const Order = mongoose.model("orders", orderSchema);
 
-const orderModel = new mongoose.model("orders", schema)
-
-module.exports = orderModel
+module.exports = Order;

@@ -5,6 +5,8 @@ const mongoose =require('mongoose')
 const bcrypt = require('bcrypt');
 const cartController = require('../userController/cartController');
 const Category = require('../../model/categoryModel');
+const Product = require('../../model/productModel'); 
+const Order = require('../../model/orderModel'); // Import the Order model// Import the product model
 
 
 
@@ -253,9 +255,63 @@ const postAddUser = async (req, res) => {
   }
 };
 
+const userOrders = async (req, res) => {
+  try {
+      // Fetch all orders from the database
+      const orders = await Order.find();
 
+      // Check if the user is authenticated and has admin privileges
+      if (req.session.user && req.session.user.isAdmin) {
+          res.render("admin/userOrders", { user: req.session.user, orders }); // Pass orders to the view
+      } else {
+          res.render('admin/adminLogin');
+      }
+  } catch (error) {
+      console.error("Error fetching orders:", error);
+      res.status(500).send("Internal Server Error");
+  }
+};
+  const stock = async (req, res) => {
+    try {
+        // Fetch all products from the database
+        const products = await Product.find();
 
+        // Check if the user is authenticated and has admin privileges
+        if (req.session.user && req.session.user.isAdmin) {
+            res.render("admin/stock", { user: req.session.user, products }); // Pass products to the view
+        } else {
+            res.render('admin/adminLogin');
+        }
+    } catch (error) {
+        console.error("Error fetching products:", error);
+        res.status(500).send("Internal Server Error");
+    }
+};
+
+const viewOrder= async (req, res) => {
+  try {
+    // Fetch the order details from the database
+    const orderId = req.params.orderId;
+    const order = await Order.findOne({ orderId }).populate('items.productId');
+
+    // Check if the user is authenticated and has admin privileges
+    if (req.session.user && req.session.user.isAdmin) {
+        if (order) {
+            res.render("admin/orderDetails", { user: req.session.user, order }); // Pass order details to the view
+        } else {
+            // Handle case where order is not found
+            res.status(404).send("Order not found");
+        }
+    } else {
+        res.render('admin/adminLogin');
+    }
+} catch (error) {
+    console.error("Error fetching order details:", error);
+    res.status(500).send("Internal Server Error");
+}
+};
 
 
 module.exports = { adminmgmtGet, adminLogin ,adminLoginPost,logoutAdmin,userManagment, addItem,blockUser,unblockUser,addUser,
-  postAddUser}
+  postAddUser,userOrders,viewOrder,
+  stock}

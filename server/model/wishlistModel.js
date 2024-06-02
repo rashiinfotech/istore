@@ -13,7 +13,7 @@ const schema = new mongoose.Schema({
             ref: 'productDetails',
             required: true,
         },
-        size: String
+
     }]
 });
 

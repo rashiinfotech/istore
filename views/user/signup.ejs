@@ -7,13 +7,32 @@
     <title>istore User Login</title>
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="../../static/user/css/vendor.css">
-    <link rel="stylesheet" href="../../static/user/css/app.css">
+    <link rel="stylesheet" href="../../static/css/vendor.css">
+    <link rel="stylesheet" href="../../static/css/app.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <!-- Include the Google Sign-In JavaScript SDK -->
     <script src="https://apis.google.com/js/platform.js" async defer></script>
 </head>
-
+<style>
+    .logo img {
+      width:120px; /* Adjust width as needed */
+      height: auto; /* Maintain aspect ratio */
+      vertical-align: middle;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 150px;
+    }
+    .auth-title {
+      display: flex;
+      
+      justify-content: center;
+      gap: 90px; /* Space between logo and heading */
+      margin-top: 100px;
+    }
+    .auth-title .title-text {
+    margin-top: 1500px; /* Adjust as needed to move the title down */
+  }
+  </style>
 <body>
     <div class="auth">
         <div class="auth-container">
@@ -21,12 +40,8 @@
                 <header class="auth-header">
                     <h1 class="auth-title">
                         <div class="logo">
-                            <span class="l l1"></span>
-                            <span class="l l2"></span>
-                            <span class="l l3"></span>
-                            <span class="l l4"></span>
-                            <span class="l l5"></span>
-                        </div> istore User
+                            <img src="../../static/img/logo black small .png" alt="Logo">
+                        </div> User Signup
                     </h1>
                 </header>
                 <div class="auth-content">
@@ -106,7 +121,7 @@
                     </form>
 
                     <!-- Add a button for signing in with Google -->
-                    <div class="text-center">
+                    <div class="text-center">google sign
                         <div class="g-signin2" data-onsuccess="onSignIn">VVV</div>
                     </div>
                 </div>

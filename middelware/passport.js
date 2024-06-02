@@ -1,8 +1,6 @@
 const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
-const User = require('../server/model/userModel'); // Assuming you have a UserModel
-// passport.js
-
+const User = require('../server/model/userModel'); // Adjust the path if necessary
 
 module.exports = function(passport) {
     passport.use(new LocalStrategy(

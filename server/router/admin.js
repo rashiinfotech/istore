@@ -1,6 +1,9 @@
 const express = require('express');
 const { adminmgmtGet, adminLogin, adminLoginPost, logoutAdmin, userManagment, addItem, blockUser, addUser, unblockUser,
-    postAddUser } = require('../controller/adminController/adminController');
+    postAddUser,
+    userOrders,
+    viewOrder,
+stock } = require('../controller/adminController/adminController');
 const { catList , addCat, submitCat, blockCat, editCat, deleteCat,unblockCat ,updateCat} = require('../controller/adminController/categoryController');
 const { submitItems, getsubmitItems, itemsList,updateImage, itemEditor, updateProduct, deleteProduct, activateProduct ,deleteImage ,productImgEditor } = require('../../server/controller/adminController/productController');
 const adminRouter = express.Router();
@@ -56,5 +59,10 @@ adminRouter.put('/admin/update-product/:productId', updateProduct);
 // Server-side route for deleting image
 adminRouter.delete('/admin/delete-image/:productId/:imageIndex', deleteImage);
 adminRouter.get('/product-img-editor',productImgEditor)
+adminRouter.get('/userOrders', userOrders);
+adminRouter.get('/Stock', stock)
+adminRouter.get('/orders/:orderID',viewOrder);
+
+
 
 module.exports = adminRouter;

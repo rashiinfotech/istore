@@ -1,4 +1,5 @@
-const { body, validationResult } = require('express-validator')
+const { body, validationResult } = require('express-validator');
+const User = require('../server/model/userModel');
 
 // middleware/authMiddleware.js
 
@@ -8,42 +9,89 @@ const { body, validationResult } = require('express-validator')
 //     }
 //     res.redirect('/login');
 //   };
-const isAuthenticated = (req, res, next) => {
-    console.log("wait user check is auth");
-    // Check if user is authenticated (you need to implement this logic based on your authentication mechanism)
-    const isAuthenticated = req.session.isAuth || false; // Assuming req.session.isAuth is set after successful authentication
-    
-    // Store the authentication status in the request object
-    req.isAuthenticated = isAuthenticated;
-    req.userDetails = req.session.user; // Assuming user details are stored in req.session.user
-    console.log("user signed and passed middleware: ", req.userDetails);
-    
-    next();
+const isAuthenticatedGuest = (req, res, next) => {
+  console.log("wait user check is auth");
+  // Check if user is authenticated (you need to implement this logic based on your authentication mechanism)
+  const isAuthenticated = req.session.isAuth || false; // Assuming req.session.isAuth is set after successful authentication
+  
+  // Store the authentication status in the request object
+  req.isAuthenticated = isAuthenticated;
+  req.userDetails = req.session.user; // Assuming user details are stored in req.session.user
+  console.log("user signed and passed middleware: ", req.userDetails);
+  
+  next();
 };
-// Validation middleware
-// validationMiddleware.js
+const isAuthenticated = async (req, res, next) => {
+  console.log("wait user check is auth....");
+  const userId = req.session.userId;
+  console.log("wait user check is auth", userId);
+  
+  try {
+      const user = await User.findById(userId);
 
-const validateSignupoDefine = [
+      // Check if user is authenticated (you need to implement this logic based on your authentication mechanism)
+      const isAuthenticated = req.session.isAuth || false;
+
+      if (!isAuthenticated || user.blocked) {
+          return res.render("user/login");
+      } else {
+          // Store the authentication status in the request object
+          req.isAuthenticated = isAuthenticated;
+          req.userDetails = req.session.user; // Assuming user details are stored in req.session.user
+          console.log("user signed and passed middleware: ", req.userDetails);
+
+          return next();
+      }
+  } catch (error) {
+      // Handle any errors that might occur during authentication or user retrieval
+      console.error("Error occurred during authentication:", error);
+      return res.status(500).send("Internal Server Error");
+  }
+};
+
+
+
+const validateProfileUpdate = [
+    (req, res, next) => {
+        console.log('Executing validation if profile updation');
+        console.log(req.body);
+        next();
+    },
+   
     body('username').notEmpty().withMessage('Username is required'),
+    body('email').isEmail().withMessage('Email is invalid'),
+    body('phone').notEmpty().withMessage('Phone number is required').isNumeric().withMessage('Phone number must be numeric'),
+
+    (req, res, next) => {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({
+                success: false,
+                errors: errors.array()
+                
+            });
+        }
+        next();
+    }
+];
+
+
+
+// Validation middleware
+const validateSignup = [
+    (req, res, next) => {
+        console.log('Executing validation middleware');
+        next();
+    },
+    body('username').notEmpty().withMessage('User name is required'),
     body('email').isEmail().withMessage('Invalid email format'),
     body('phone').isLength({ min: 10, max: 10 }).withMessage('Invalid phone number'),
     body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters long'),
 ];
 
-const validateSignup = (req, res, next) => {
-    // Execute the validation rules
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() });
-    }
-    // If validation succeeds, move to the next middleware/route handler
-    next();
-};
-
-
-
-
-  module.exports = {isAuthenticated,validateSignup,validateSignupoDefine };
+  module.exports = {isAuthenticated,validateSignup,validateProfileUpdate,
+    isAuthenticatedGuest
+   };
   
   // <!-- address secion -->
   // <div class="profile-box p-4 mb-4">

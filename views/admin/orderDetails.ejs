@@ -1,0 +1,32 @@
+<%- include("adminHead.ejs") %>
+
+<div class="container">
+    <h2>Order Details</h2>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Product ID</th>
+                <th>Product Name</th>
+                <th>Quantity</th>
+                <th>Price</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% order.items.forEach(item => { %>
+            <tr>
+                <td><%= item.productId %></td>
+                <td><%= item.name %></td>
+                <td><%= item.quantity %></td>
+                <td><%= item.price %></td>
+            </tr>
+            <% }); %>
+        </tbody>
+    </table>
+    <p>Total Amount: <%= order.amount %></p>
+    <p>Status: <%= order.status %></p>
+    <p>Address: <%= order.address %></p>
+    <!-- Add more order details as needed -->
+</div>
+
+</body>
+</html>
