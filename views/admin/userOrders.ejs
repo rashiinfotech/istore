@@ -1,31 +1,90 @@
-<%- include ("adminHead.ejs") %>
+<!DOCTYPE html>
+<html lang="en">
 
+<head>
+    <!-- Include necessary CSS and JavaScript files -->
+    <%- include("adminHead.ejs") %>
+</head>
 
-<div class="container">
-    <h2>User Orders</h2>
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Order ID</th>
-                <th>User ID</th>
-                <th>Total Amount</th>
-                <th>Status</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            <% orders.forEach(order => { %>
-            <tr>
-                <td><%= order.orderId %></td>
-                <td><%= order.userId %></td>
-                <td><%= order.amount %></td>
-                <td><%= order.status %></td>
-                <td><a href="/admin/orders/<%= order.orderId %>">View Details</a></td>
-            </tr>
-            <% }); %>
-        </tbody>
-    </table>
+<body>
+<style>
+    .badge {
+        display: inline-block;
+        min-width: 10px;
+        padding: 5px 10px;
+        font-size: 12px;
+        font-weight: 700;
+        line-height: 1;
+        color: #fff;
+        text-align: center;
+        white-space: nowrap;
+        vertical-align: middle;
+        border-radius: 5px;
+    }
+
+    .bg-danger { background-color: #dc3545; }
+    .bg-warning { background-color: #ffc107; }
+    .bg-success { background-color: #28a745; }
+    .bg-info { background-color: #17a2b8; }
+
+    /* Add padding to the main content to avoid overlap with header */
+    .main-content {
+        padding-top: 30px; /* Adjust the value to match the header height */
+        padding-bottom: 50px; /* Adjust the value to create space at the bottom */
+    }
+</style>
+
+<div class="container mt-5 main-content">
+    <h2 class="mb-4 text-center text-primary">My Orders</h2>
+    <% if (orders.length === 0) { %>
+        <div class="alert alert-info" role="alert">
+            No orders found.
+        </div>
+    <% } else { %>
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead class="table-dark">
+                    <tr>
+                        <th scope="col">Order ID</th>
+                        <th scope="col">Amount</th>
+                        <th scope="col">Date</th>
+                        <th scope="col">Time</th>
+                        <th scope="col">Status</th>
+                        <th scope="col">Details</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% orders.forEach(order => { %>
+                        <tr>
+                            <td><%= order.orderId %></td>
+                            <td>₹<%= order.amount.toFixed(2) %></td>
+                            <td><%= new Date(order.createdAt).toLocaleDateString() %></td>
+                            <td><%= new Date(order.createdAt).toLocaleTimeString() %></td>
+                            <td>
+                                <span class="badge 
+                                    <%= order.status === 'Cancelled' ? 'bg-danger' : 
+                                        order.status === 'Pending' ? 'bg-warning' :
+                                        order.status === 'Delivered' ? 'bg-success' :
+                                        order.status === 'In Transit' ? 'bg-info' :
+                                        order.status === 'Completed' ? 'bg-success' : '' %>">
+                                    <%= order.status %>
+                                </span>
+                            </td>
+                            <td>
+                                <a href="order-details/<%= order.orderId %>" class="btn btn-primary btn-sm">View Details</a>
+                            </td> 
+                        </tr>
+                    <% }); %>
+                </tbody>
+            </table>
+        </div>
+    <% } %>
 </div>
 
+<%- include("adminFooter.ejs") %>
+    
+<!-- Bootstrap and jQuery scripts should be included here if not already included -->
+
 </body>
+
 </html>

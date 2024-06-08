@@ -2,10 +2,12 @@ const express = require('express');
 const { adminmgmtGet, adminLogin, adminLoginPost, logoutAdmin, userManagment, addItem, blockUser, addUser, unblockUser,
     postAddUser,
     userOrders,
-    viewOrder,
+    viewOrder, updateOrderStatus,
 stock } = require('../controller/adminController/adminController');
 const { catList , addCat, submitCat, blockCat, editCat, deleteCat,unblockCat ,updateCat} = require('../controller/adminController/categoryController');
-const { submitItems, getsubmitItems, itemsList,updateImage, itemEditor, updateProduct, deleteProduct, activateProduct ,deleteImage ,productImgEditor } = require('../../server/controller/adminController/productController');
+const { submitItems, getsubmitItems, itemsList,updateImage, itemEditor, updateProduct, deleteProduct, activateProduct ,deleteImage ,productImgEditor,
+   
+ } = require('../../server/controller/adminController/productController');
 const adminRouter = express.Router();
 const multer = require('multer');
 const upload = multer({ dest: 'uploads/' });
@@ -61,7 +63,9 @@ adminRouter.delete('/admin/delete-image/:productId/:imageIndex', deleteImage);
 adminRouter.get('/product-img-editor',productImgEditor)
 adminRouter.get('/userOrders', userOrders);
 adminRouter.get('/Stock', stock)
-adminRouter.get('/orders/:orderID',viewOrder);
+adminRouter.get('/order-details/:orderId',viewOrder);
+adminRouter.post('/orders/:orderId/status', updateOrderStatus);
+
 
 
 

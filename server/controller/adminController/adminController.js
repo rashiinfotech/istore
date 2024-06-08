@@ -7,7 +7,7 @@ const cartController = require('../userController/cartController');
 const Category = require('../../model/categoryModel');
 const Product = require('../../model/productModel'); 
 const Order = require('../../model/orderModel'); // Import the Order model// Import the product model
-
+const User=require('../../model/userModel');
 
 
 
@@ -258,7 +258,9 @@ const postAddUser = async (req, res) => {
 const userOrders = async (req, res) => {
   try {
       // Fetch all orders from the database
-      const orders = await Order.find();
+     
+      const orders = await Order.find({}).sort({ createdAt: -1 }); // Sort orders by creation date descending
+
 
       // Check if the user is authenticated and has admin privileges
       if (req.session.user && req.session.user.isAdmin) {
@@ -288,30 +290,82 @@ const userOrders = async (req, res) => {
     }
 };
 
-const viewOrder= async (req, res) => {
+const viewOrder = async (req, res) => {
   try {
-    // Fetch the order details from the database
+    console.log("admin side view orders");
+
     const orderId = req.params.orderId;
     const order = await Order.findOne({ orderId }).populate('items.productId');
+console.log("orderis.....",order);
+    if (!order) {
+      return res.status(404).json({ error: 'Order not found' });
+    }
+
+    // Fetch user details
+    const user = await User.findById(order.userId);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Fetch product details
+    const productIds = order.items.map(item => item.productId);
+    const products = await Product.find({ _id: { $in: productIds } });
+    console.log("produxts......name",products);
+    console.log("user......", user);
+
 
     // Check if the user is authenticated and has admin privileges
     if (req.session.user && req.session.user.isAdmin) {
-        if (order) {
-            res.render("admin/orderDetails", { user: req.session.user, order }); // Pass order details to the view
-        } else {
-            // Handle case where order is not found
-            res.status(404).send("Order not found");
-        }
+      res.render('admin/orderDetails', { 
+        products,
+        order,
+        orderId: order.orderId, 
+        amount: order.amount, 
+        paymentOption: order.payment,
+        isAuthenticated: req.isAuthenticated(),
+        user: req.session.user,
+        customer: user,
+    });
+    
     } else {
-        res.render('admin/adminLogin');
+      res.render('admin/adminLogin');
     }
-} catch (error) {
-    console.error("Error fetching order details:", error);
-    res.status(500).send("Internal Server Error");
-}
+  } catch (error) {
+    // Handle errors
+    console.error('Error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
 };
 
 
+
+const updateOrderStatus = async (req, res) => {
+  try {
+    const orderId = req.params.orderId;
+    const { status } = req.body;
+
+    // Find the order by orderId and update the status
+    const order = await Order.findOneAndUpdate(
+      { orderId },
+      { status },
+      { new: true }
+    );
+
+    if (!order) {
+      return res.status(404).json({ error: 'Order not found' });
+    }
+
+    res.redirect(`/admin/userOrders`);
+  } catch (error) {
+    console.error('Error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+
+
+
+
 module.exports = { adminmgmtGet, adminLogin ,adminLoginPost,logoutAdmin,userManagment, addItem,blockUser,unblockUser,addUser,
-  postAddUser,userOrders,viewOrder,
+  postAddUser,userOrders,viewOrder,updateOrderStatus,
   stock}
