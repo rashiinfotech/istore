@@ -32,7 +32,12 @@ const userSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Wallet' // Assuming 'Wallet' is the name of your wallet model
     },
-    cart: [{ type: mongoose.Schema.Types.ObjectId, ref: 'CartItem' }] // Define the cart field
+    cart: [{ type: mongoose.Schema.Types.ObjectId, ref: 'CartItem' }], // Define the cart field
+    googleId: {
+        type: String,
+        unique: true,
+        sparse: true // Allow null values
+    }
 });
 
 const User = mongoose.model('User', userSchema);

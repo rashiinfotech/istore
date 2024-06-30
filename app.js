@@ -11,6 +11,7 @@ const multer = require('multer');
 const passport = require('passport');
 const app = express();
 const PORT = process.env.PORT || 8000;
+const Razorpay= require('razorpay') 
 
 // Serve static files from the 'static' directory
 app.use('/static', express.static(path.join(__dirname, 'static')));
@@ -81,6 +82,10 @@ const upload = multer({
     limits: { fileSize: 5 * 1024 * 1024 },
     fileFilter: fileFilter
 });
+var instance = new Razorpay({
+    key_id: 'process.env.RAZORPAY_KEY_SECRET',
+    key_secret: 'process.env.RAZORPAY_KEY_SECRET',
+  });
 
 // Routing for user and admin
 app.use('/', userRouter);

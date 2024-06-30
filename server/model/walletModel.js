@@ -2,29 +2,36 @@ const mongoose = require('mongoose')
 const schema = new mongoose.Schema({
     userId: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'userDetails'
+        ref: 'userDetails',
+        required: true,
+        unique: true
     },
-
-    history: [{
-
-        transaction: {
-            type: String,
-            required: true,
-        },
-        amount: {
-            type: Number,
-            required: true,
-        },
-        date: {
-            type: Date,
-            required: true,
-        },
-        reason: {
-            type: String
+    balance: {
+        type: Number,
+        default: 0,
+        required: true
+    },
+    transactions: [
+        {
+            date: {
+                type: Date,
+                default: Date.now
+            },
+            amount: {
+                type: Number,
+                required: true
+            },
+            type: {
+                type: String,
+                enum: ['credit', 'debit'],
+                required: true
+            },
+            description: {
+                type: String,
+                required: true
+            }
         }
-    },
-    ],
-
+    ]
 });
 
 

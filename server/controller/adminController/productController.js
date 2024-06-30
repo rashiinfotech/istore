@@ -420,4 +420,4 @@ const deleteImage = async (req, res) => {
 
 
 module.exports = { submitItems, getsubmitItems,itemsList ,itemEditor,updateProduct,
-    deleteProduct,activateProduct,deleteImage,updateImage,productImgEditor,};
+    deleteProduct,activateProduct,deleteImage,updateImage,productImgEditor};

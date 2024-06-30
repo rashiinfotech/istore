@@ -8,6 +8,8 @@ const Category = require('../../model/categoryModel');
 const Product = require('../../model/productModel'); 
 const Order = require('../../model/orderModel'); // Import the Order model// Import the product model
 const User=require('../../model/userModel');
+const couponModel =require('../../model/couponModel');
+
 
 
 
@@ -363,9 +365,190 @@ const updateOrderStatus = async (req, res) => {
 };
 
 
+const coupons = async (req, res) => {
+  try {
+      const Products = await Product.find();
+      if (req.session.user && req.session.user.isAdmin) {
+          // Pass success or error messages if they exist
+          const successMessage = req.session.successMessage;
+          const errorMessage = req.session.errorMessage;
+          // Clear the session variables after retrieving their values
+          delete req.session.successMessage;
+          const user = req.session.user;
+          delete req.session.errorMessage;
+
+          const Coupons = await couponModel.find();
+          
+          // Ensure all coupons have a valid expiry date
+          Coupons.forEach(coupon => {
+              if (coupon.expiry && !(coupon.expiry instanceof Date)) {
+                  coupon.expiry = new Date(coupon.expiry);
+              }
+          });
+
+          res.render('admin/coupons', { user, Products, successMessage, errorMessage, Coupons });
+      } else {
+          res.render('admin/dashboard');
+      }
+  } catch (error) {
+      // Handle any errors that might occur during database query
+      console.error(error);
+      res.status(500).send('Internal Server Error');
+  }
+};
+
+const addCouponsPage = (req, res) => {
+  if (req.session.user && req.session.user.isAdmin) {
+      res.render('admin/add-coupon', { user: req.session.user,errorMessage: req.session.errorMessage,  successMessage: req.session.successMessage || null });
+      delete req.session.successMessage; // Clear the message after displaying it
+  } else {
+      res.redirect('/admin/dashboard');
+  }
+};
+
+// Handle the form submission to add a new coupon
+const addCoupons = async (req, res) => {
+  try {
+    const { couponCode, type, discount, expiry, maxRedeem, minimumPrice, status } = req.body;
+
+    // Check if coupon code already exists
+    const existingCoupon = await couponModel.findOne({ couponCode });
+    if (existingCoupon) {
+      req.session.errorMessage = 'Coupon code already exists. Please use a different code.';
+      req.session.successMessage = '';
+      return res.redirect('/admin/add-coupon');
+    }
+
+    // Validate expiry date is in the future
+    const expiryDate = new Date(expiry);
+    const currentDate = new Date();
+    if (expiryDate <= currentDate) {
+      req.session.errorMessage = 'Expiration date must be in the future.';
+      req.session.successMessage = '';
+      return res.redirect('/admin/add-coupon');
+    }
+
+    const newCoupon = new couponModel({
+      couponCode,
+      type,
+      discount,
+      expiry: expiryDate,
+      maxRedeem,
+      minimumPrice,
+      status: status === 'true'
+    });
+
+    await newCoupon.save();
+    req.session.successMessage = 'Coupon added successfully!';
+    req.session.errorMessage = '';
+    res.redirect('/admin/add-coupon');
+  } catch (error) {
+    console.error(error);
+    req.session.errorMessage = 'Failed to add coupon. Please try again.';
+    req.session.successMessage = '';
+    res.redirect('/admin/add-coupon');
+  }
+};
+
+const deleteCoupon = async (req, res) => {
+  const couponId = req.params.couponId;
+console.log("delet copun hitt");
+  try {
+      // Your deletion logic here
+      await couponModel.findByIdAndDelete(couponId); // Example using Mongoose
+      req.session.successMessage = 'Coupon deleted successfully!';
+      res.redirect('/admin/coupons');
+  } catch (error) {
+      console.error(error);
+      req.session.errorMessage = 'Failed to delete coupon. Please try again.';
+      res.redirect('/admin/coupons');
+  }
+};
+const editCouponpage = async (req, res) => {
+  const couponId = req.params.couponId;
+
+  try {
+      if (req.session.user && req.session.user.isAdmin) {
+          const coupon = await couponModel.findById(couponId); // Assuming you're using Mongoose
+          if (!coupon) {
+              req.session.errorMessage = 'Coupon not found.';
+              return res.redirect('/admin/dashboard');
+          }
+
+          res.render('admin/edit-coupon', {
+              coupon,
+              user: req.session.user,
+              errorMessage: req.session.errorMessage,
+              successMessage: req.session.successMessage || null
+          });
+
+          delete req.session.successMessage; // Clear the message after displaying it
+      } else {
+          res.redirect('/admin/dashboard');
+      }
+  } catch (error) {
+      console.error('Error fetching coupon:', error);
+      req.session.errorMessage = 'Failed to fetch coupon. Please try again.';
+      res.redirect('/admin/dashboard');
+  }
+};
+
+
+
+const updateCoupon = async (req, res) => {
+  const couponId = req.params.couponId;
+
+  try {
+      const { couponCode, type, discount, expiry, maxRedeem, minimumPrice, status } = req.body;
+
+      // Assuming you are using Mongoose for your model
+      const coupon = await couponModel.findById(couponId);
+
+      if (!coupon) {
+          req.session.errorMessage = 'Coupon not found.';
+          return res.redirect('/admin/coupons');
+      }
+
+      // Check if the new coupon code already exists (excluding current coupon)
+      const existingCoupon = await couponModel.findOne({ couponCode, _id: { $ne: couponId } });
+      if (existingCoupon) {
+          req.session.errorMessage = 'Coupon code already exists. Please choose a different code.';
+          return res.redirect(`/admin/edit-coupon/${couponId}`);
+      }
+
+      // Check if expiry date is valid (must be after current date)
+      const currentDate = new Date();
+      const couponExpiryDate = new Date(expiry);
+      if (couponExpiryDate <= currentDate) {
+          req.session.errorMessage = 'Expiration date must be after the current date.';
+          return res.redirect(`/admin/edit-coupon/${couponId}`);
+      }
+
+      // Update the coupon document with new values
+      coupon.couponCode = couponCode;
+      coupon.type = type;
+      coupon.discount = discount;
+      coupon.expiry = couponExpiryDate;
+      coupon.maxRedeem = maxRedeem;
+      coupon.minimumPrice = minimumPrice;
+      coupon.status = status === 'true'; // Convert string to boolean
+
+      await coupon.save(); // Save the updated coupon
+
+      req.session.successMessage = 'Coupon updated successfully!';
+      res.redirect('/admin/coupons'); // Redirect to coupon list or dashboard after successful update
+  } catch (error) {
+      console.error('Error updating coupon:', error);
+      req.session.errorMessage = 'Failed to update coupon. Please try again.';
+      res.redirect(`/admin/edit-coupon/${couponId}`); // Redirect back to edit page with error message
+  }
+};
+
+
 
 
 
 module.exports = { adminmgmtGet, adminLogin ,adminLoginPost,logoutAdmin,userManagment, addItem,blockUser,unblockUser,addUser,
-  postAddUser,userOrders,viewOrder,updateOrderStatus,
+  postAddUser,userOrders,viewOrder,updateOrderStatus,coupons,addCoupons,addCouponsPage,deleteCoupon,
+  editCouponpage,updateCoupon,
   stock}

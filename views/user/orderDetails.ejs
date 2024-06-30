@@ -105,7 +105,7 @@
 <div class="order-details-container">
     <div class="order-details-header">Order Details</div>
     <div class="order-details-content">
-        <div>Order ID: <%= orderId %></div>
+        <div>Order ID: <%= order.orderId %></div>
         <div>Order Amount: ₹<%= order.amount %></div>
         <div>Payment Method: <%= order.payment %></div>
         <div>Order Date: <%= order.createdAt.toDateString() %></div>
@@ -122,6 +122,7 @@
                         <span><strong>Product:</strong> <a href="/product/<%= product._id %>"><%= product.name %></a></span>
                         <span><strong>Quantity:</strong> <%= item.quantity %></span>
                         <span><strong>Price:</strong> ₹<%= item.price %></span>
+                        <span><strong>Total:</strong> ₹<%= item.quantity * item.price %></span>
                     </div>
                 </li>
             <% }); %>
@@ -132,6 +133,7 @@
         <% if (order.status !== 'Cancelled') { %>
             <button onclick="confirmCancel()">Cancel Order</button>
         <% } %>
+        <a href="/generate-bill/<%= order._id %>" target="_blank">View Bill</a>
     </div>
 </div>
 
@@ -157,7 +159,7 @@
 
     function cancelOrder() {
     // Send a request to cancel the order
-    fetch(`/cancel-orders/<%= orderId %>`)
+    fetch(`/cancel-orders/<%= order._id %>`)
     .then(response => {
         if (response.ok) {
             // Order successfully cancelled, show success message
@@ -180,8 +182,6 @@
         swal("Error", "Failed to cancel order", "error");
     });
 }
-
-
 </script>
 
 <%- include("footer.ejs") %>

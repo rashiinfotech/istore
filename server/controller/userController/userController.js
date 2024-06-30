@@ -13,7 +13,7 @@ const isAuthenticated = require('../../../middelware/userAuth'); // Import the i
 const Order = require('../../model/orderModel');
 const shortid = require('shortid');
 const Coupon = require('../../model/couponModel');
-
+const passport = require('passport');
 
 router.use(flash());
 
@@ -193,11 +193,11 @@ const loginGet = async (req, res) => {
         res.redirect("/");
         return;
     }
+    const errorMessage = req.query.error || null; // Retrieve error message from query parameter
     req.session.returnTo = req.query.returnTo || '/';
-    res.render('user/login'); // Render your login page
-
-
+    res.render('user/login', { errorMessage }); // Pass the errorMessage to the view
 };
+
 
 
 
@@ -205,17 +205,20 @@ const loginGet = async (req, res) => {
 const loginPost = async (req, res) => {
     try {
         const { email, password } = req.body;
+
         // Find user by email
         const user = await User.findOne({ email: email });
 
+        // Check if user exists and credentials are correct
         if (user && !user.blocked && (await bcrypt.compare(password, user.password))) {
+            // Set session variables
             req.session.userId = user._id;
             req.session.username = user.username;
             req.session.user = user;
             req.session.isAuth = true;
-            console.log("success");
+            console.log("Login success");
 
-            // Send JSON response instead of redirecting
+            // Send JSON response for successful login
             res.json({ message: 'Login successful', redirectTo: '/' });
         } else {
             // Send JSON response for invalid credentials
@@ -226,9 +229,7 @@ const loginPost = async (req, res) => {
         // Send JSON response for server error
         res.status(500).json({ error: 'An error occurred during login' });
     }
-};
-
-
+}
 
 
 
@@ -260,32 +261,7 @@ const index = async (req, res) => {
 
 
 
-const store=async (req, res) => {
-    try {
-        const page = req.query.page || 1;
-        const limit = 10; // Adjust the limit as per your requirement
-        const skip = (page - 1) * limit;
-
-        // Find only the active products
-        const products = await productModel.find({ status: true })
-            .populate('category', 'name')
-            .skip(skip)
-            .limit(limit);
-        const categories = await Category.find();
-
-        res.render('user/store', { 
-            products, 
-            categories, 
-            isAuthenticated: req.isAuthenticated,
-            user: req.isAuthenticated ? req.userDetails : null,
-            userName: req.isAuthenticated ? req.userDetails.userName : null // Pass user details only if authenticated
-
-         });
-    } catch (error) {
-        console.error(error);
-        res.status(500).send('Internal Server Error');
-    }
-};
+ 
 
 
 const logout = (req, res) => {
@@ -342,11 +318,227 @@ const getProduct = async (req, res) => {
     }
 };
 
+const store = async (req, res) => {
+    try {
+        const page = parseInt(req.query.page) || 1;
+        const perPage = 9;
+
+        // Fetch categories as Mongoose documents
+        const categories = await Category.find().lean(); // Fetch categories as plain objects
+
+        // Count products for each category
+        const categoryCounts = await Promise.all(categories.map(async category => {
+            const count = await productModel.countDocuments({ category: category._id, status: true });
+            return { ...category, productCount: count }; // Spread category object and add productCount
+        }));
+
+        console.log('Categories with product count:', categoryCounts); // Debugging
+
+        // Fetch products with pagination
+        const products = await productModel.find({ status: true })
+            .populate('category', 'name')
+            .skip((perPage * page) - perPage)
+            .limit(perPage);
+
+        const totalResults = await productModel.countDocuments({ status: true });
+        const totalPages = Math.ceil(totalResults / perPage);
+        const showingFrom = (page - 1) * perPage + 1;
+        const showingTo = Math.min(page * perPage, totalResults);
+
+        const maxPrice = await productModel.find({ status: true }).sort({ price: -1 }).limit(1).then(products => products[0]?.price || 0);
+
+        res.render('user/store', {
+            categories: categoryCounts,
+            products,
+            totalResults,
+            totalPages,
+            currentPage: page,
+            showingFrom,
+            showingTo,
+            maxPrice,
+            isAuthenticated: req.isAuthenticated,
+            user: req.isAuthenticated ? req.userDetails : null,
+            userName: req.isAuthenticated ? (req.userDetails ? req.userDetails.username : null) : null
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Internal Server Error');
+    }
+};
 
 
 
 
+const fetchProducts = async (req, res) => {
+    try {
+        console.log("Fetching products based on filters...");
+        const { categories, minPrice, maxPrice } = req.query;
+        const categoryFilter = categories ? { category: { $in: categories.split(',') } } : {};
+        const priceFilter = {
+            price: {
+                $gte: parseFloat(minPrice) || 0,
+                $lte: parseFloat(maxPrice) || Number.MAX_SAFE_INTEGER
+            }
+        };
 
+        const filters = { ...categoryFilter, ...priceFilter };
+        console.log('Applied Filters:', filters);
+
+        const products = await productModel.find(filters).populate('category', 'name');
+        res.json({ products });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+};
+
+
+// Function to fetch products based on filters
+// const fetchFilteredProducts = async () => {
+//     const selectedCategories = Array.from(document.querySelectorAll('.category-checkbox:checked')).map(cb => cb.getAttribute('data-category-id'));
+//     const minPrice = document.getElementById('price-min').value;
+//     const maxPrice = document.getElementById('price-max').value;
+//     const queryString = `?categories=${selectedCategories.join(',')}&minPrice=${minPrice}&maxPrice=${maxPrice}`;
+
+//     try {
+//         const response = await fetch(`/api/products${queryString}`);
+//         const data = await response.json();
+//         const productContainer = document.getElementById('product-container');
+        
+//         // Clear the current products
+//         productContainer.innerHTML = '';
+
+//         // Render the fetched products
+//         data.products.forEach((product, index) => {
+//             const productHtml = `
+//                 <div class="col-md-4 col-xs-6 product-item">
+//                     <div class="product">
+//                         <a href="/product/${product._id}">
+//                             <div class="product-img">
+//                                 <img src="${product.image[0]}" alt="" class="img-responsive">
+//                                 <div class="product-label">
+//                                     ${product.sale ? `<span class="sale">-${product.sale}%</span>` : ''}
+//                                     <span class="new">NEW</span>
+//                                 </div>
+//                             </div>
+//                         </a>
+//                         <div class="product-body">
+//                             <p class="product-category">${product.category.name}</p>
+//                             <h3 class="product-name"><a href="/product/${product._id}">${product.name}</a></h3>
+//                             <h4 class="product-price">
+//                                 ₹${product.sale ? (product.price * (1 - product.sale / 100)).toFixed(2) : product.price.toFixed(2)}
+//                                 ${product.sale ? `<br><span class="product-old-price">₹${product.price.toFixed(2)}</span>` : ''}
+//                             </h4>
+//                             <div class="product-btns">
+//                                 <button class="add-to-wishlist" data-product-id="${product._id}">
+//                                     <i class="fa fa-heart-o wishlist-icon"></i>
+//                                     <span class="tooltipp">add to wishlist</span>
+//                                 </button>
+//                                 <button class="add-to-compare"><i class="fa fa-exchange"></i>
+//                                     <span class="tooltipp">add to compare</span>
+//                                 </button>
+//                                 <button class="quick-view"><i class="fa fa-eye"></i>
+//                                     <span class="tooltipp">quick view</span>
+//                                 </button>
+//                             </div>
+//                         </div>
+//                         <div class="add-to-cart">
+//                             <button class="add-to-cart-btn" data-product-id="${product._id}">
+//                                 <i class="fa fa-shopping-cart"></i> add to cart
+//                             </button>
+//                         </div>
+//                     </div>
+//                 </div>
+//             `;
+//             productContainer.innerHTML += productHtml;
+
+//             if ((index + 1) % 3 === 0) {
+//                 productContainer.innerHTML += '<div class="clearfix visible-md visible-lg"></div>';
+//             }
+//         });
+//     } catch (error) {
+//         console.error('Error fetching filtered products:', error);
+//     }
+// };
+
+// // Event listeners for filter changes
+// document.querySelectorAll('.category-checkbox').forEach(checkbox => {
+//     checkbox.addEventListener('change', fetchFilteredProducts);
+// });
+
+// const priceInputs = document.querySelectorAll('#price-min, #price-max');
+// priceInputs.forEach(input => {
+//     input.addEventListener('change', fetchFilteredProducts);
+// });
+
+
+const filterProduct = async (req, res) => {
+    try {
+        const perPage = 10; // Number of products per page
+        const page = req.query.page || 1; // Current page number
+
+        let query = { status: true }; // Your base query object
+        const { categories, minPrice, maxPrice } = req.query;
+
+        // Handle categories filter if categories are provided in query params
+        if (categories && Array.isArray(categories)) {
+            query.category = { $in: categories }; // Assuming category field in your product schema
+        }
+
+        // Handle price filter if minPrice and maxPrice are provided
+        if (minPrice && maxPrice) {
+            query.price = { $gte: minPrice, $lte: maxPrice };
+        }
+
+        // Find products matching the query with pagination
+        const products = await productModel.find(query)
+            .populate('category', 'name')
+            .skip((perPage * page) - perPage)
+            .limit(perPage);
+           
+            console.log(maxPrice);
+        const count = await productModel.countDocuments(query);
+
+        // Fetch categories
+        const allCategories = await Category.find();
+
+        const totalResults = count; // Total number of products
+        const totalPages = Math.ceil(totalResults / perPage); // Total number of pages
+        const showingFrom = (page - 1) * perPage + 1; // Starting product number on the current page
+        const showingTo = Math.min(page * perPage, totalResults); // Ending product number on the current page
+
+        const isAuthenticated = req.isAuthenticated;
+        const user = isAuthenticated ? req.userDetails : null;
+        const userName = isAuthenticated ? (req.userDetails ? req.userDetails.username : null) : null;
+
+        res.render('user/store', {
+            products,
+            categories: allCategories, // Ensure categories is passed as an array
+            totalResults,
+            totalPages,
+            currentPage: page,
+            showingFrom,
+            showingTo,
+            isAuthenticated,
+            user,
+            userName // Pass user details only if authenticated
+        });
+    } catch (error) {
+        console.error('Error fetching products:', error);
+        // Handle errors appropriately, e.g., send error response
+        res.status(500).send('Error fetching products');
+    }
+};
+
+const googleAuth=(req, res) => {
+    // Successful authentication, redirect home.
+      // Successful authentication, redirect home.
+      req.session.userId = req.user._id;
+      req.session.username = req.user.username;
+      req.session.user = req.user;
+      req.session.isAuth = true;
+      res.redirect('/');
+};
     
 
 
@@ -362,5 +554,7 @@ module.exports = {
     logout,
     getProduct,
     store,
-   
+    filterProduct,
+    fetchProducts,
+    googleAuth
 };

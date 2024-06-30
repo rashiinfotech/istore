@@ -8,7 +8,7 @@ const flash = require('express-flash');
 const otpModel = require('../../model/otpModel');
 const productModel = require('../../model/productModel');
 const Address = require('../../model/addressModel');
-
+const Wallet = require('../../model/walletModel');
 const Category = require('../../model/categoryModel');
 // const { sendOTP } = require('../controller/userController/otpController');
 const isAuthenticated = require('../../../middelware/userAuth'); // Import the isAuthenticated function
@@ -282,6 +282,32 @@ const wishlist = async (req, res) => {
         }
       };
     
+
+const wishlistDelete = async (req, res) => {
+        try {
+            const userId = req.params.userId;
+            const itemId = req.params.itemId;
+    
+            // Find the wishlist by user ID
+            const wishlist = await Wishlist.findOne({ userId: userId });
+    
+            if (!wishlist) {
+                return res.status(404).json({ success: false, message: 'Wishlist not found for the user' });
+            }
+    
+            // Remove the item from the wishlist
+            wishlist.items = wishlist.items.filter(item => item.productId.toString() !== itemId);
+            await wishlist.save();
+    
+            res.status(200).json({ success: true, message: 'Item successfully deleted from wishlist' });
+        } catch (err) {
+            res.status(500).json({ success: false, message: 'Failed to delete item from wishlist', error: err });
+        }
+    };
+
+      
+    
+    
     
 
     
@@ -365,6 +391,26 @@ const address = async (req, res) => {
         res.status(500).send('Internal Server Error');
     }
 };
+const getAddress = async (req, res) => {
+    try {
+        const userId = req.session.userId;
+        if (!userId) {
+            return res.status(401).json({ error: 'User not authenticated' });
+        }
+
+        const addresses = await Address.find({ userId: userId });
+        if (!addresses) {
+            return res.status(404).json({ error: 'Addresses not found' });
+        }
+
+        res.json(addresses);
+    } catch (error) {
+        console.error('Error fetching addresses:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+};
+
+module.exports = getAddress;
 
 
 const wallet = async (req, res) => {
@@ -378,7 +424,22 @@ const wallet = async (req, res) => {
             return res.redirect('/login');
         }
 
-        res.render('user/Wallet', { user, isAuthenticated: req.isAuthenticated, categories, address });
+        // Fetch the wallet for the user
+        const wallet = await Wallet.findOne({ userId: userId });
+
+        // If no wallet found, create a new one
+        if (!wallet) {
+            wallet = new Wallet({ userId: userId });
+            await wallet.save();
+        }
+
+        res.render('user/Wallet', { 
+            user, 
+            wallet,  // Pass the wallet data to the template
+            isAuthenticated: req.isAuthenticated, 
+            categories, 
+            address 
+        });
     } catch (error) {
         console.error('Error fetching user profile:', error);
         res.status(500).send('Internal Server Error');
@@ -408,6 +469,7 @@ const resetpassword= async (req, res) => {
     }
 };
 
+module.exports = getAddress;
 
 
 module.exports = {
@@ -424,5 +486,7 @@ module.exports = {
     setPrimaryAddress,
     updateAddress,
     wishlist,
-    addToWishlist
+    addToWishlist,
+    wishlistDelete,
+    getAddress
 }

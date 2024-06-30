@@ -1,11 +1,12 @@
 const mongoose = require('mongoose');
 const shortid = require('shortid');
 const Schema = mongoose.Schema;
+const User = require('./userModel'); 
 
 const orderSchema = new mongoose.Schema({
     userId: {
         type: Schema.Types.ObjectId,
-        ref: 'userDetails',
+        ref: 'User',
         required: true,
     },
     orderId: {
@@ -37,7 +38,11 @@ const orderSchema = new mongoose.Schema({
         default: "pending",
         required: true
     },
-    address: {
+    billAddress: {
+        type: Array,
+        required: true
+    },
+    shipAddress: {
         type: Array,
         required: true
     },
@@ -73,3 +78,6 @@ const orderSchema = new mongoose.Schema({
 const Order = mongoose.model("orders", orderSchema);
 
 module.exports = Order;
+
+
+

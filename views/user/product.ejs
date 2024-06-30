@@ -1,4 +1,4 @@
-<%- include ('header.ejs')%>
+<%- include('header.ejs')%>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <!-- NAVIGATION -->
 <nav id="navigation">
@@ -103,7 +103,7 @@
 						<div class="qty-label">
 							Qty
 							<div class="input-number">
-								<input type="number" id="product-qty" value="1" min="1" max="<%= product.stock %>"></input>
+								<input type="number" id="product-qty" value="1" min="1" max="<%= product.stock %>">
 								<span class="qty-up">+</span>
 								<span class="qty-down">-</span>
 							</div>
@@ -112,7 +112,7 @@
 					</div>
 
 					<ul class="product-btns">
-						<li><a href="#"><i class="fa fa-heart-o"></i> add to wishlist</a></li>
+						<li><a href="#" class="wishlist-btn" data-product-id="<%= product._id %>"><i class="fa fa-heart-o"></i> add to wishlist</a></li>
 					</ul>
 
 					<ul class="product-links">
@@ -207,19 +207,6 @@
 											<li>
 												<div class="rating-stars">
 													<i class="fa fa-star"></i>
-													<i class="fa fa-star"></i>
-													<i class="fa fa-star-o"></i>
-													<i class="fa fa-star-o"></i>
-													<i class="fa fa-star-o"></i>
-												</div>
-												<div class="rating-progress">
-													<div></div>
-												</div>
-												<span class="sum">0</span>
-											</li>
-											<li>
-												<div class="rating-stars">
-													<i class="fa fa-star"></i>
 													<i class="fa fa-star-o"></i>
 													<i class="fa fa-star-o"></i>
 													<i class="fa fa-star-o"></i>
@@ -242,7 +229,7 @@
 											<li>
 												<div class="review-heading">
 													<h5 class="name">John</h5>
-													<p class="date">27 DEC 2022, 8:0 PM</p>
+													<p class="date">27 DEC 2023, 8:0 PM</p>
 													<div class="review-rating">
 														<i class="fa fa-star"></i>
 														<i class="fa fa-star"></i>
@@ -258,7 +245,7 @@
 											<li>
 												<div class="review-heading">
 													<h5 class="name">John</h5>
-													<p class="date">27 DEC 2022, 8:0 PM</p>
+													<p class="date">27 DEC 2023, 8:0 PM</p>
 													<div class="review-rating">
 														<i class="fa fa-star"></i>
 														<i class="fa fa-star"></i>
@@ -274,7 +261,7 @@
 											<li>
 												<div class="review-heading">
 													<h5 class="name">John</h5>
-													<p class="date">27 DEC 2022, 8:0 PM</p>
+													<p class="date">27 DEC 2023, 8:0 PM</p>
 													<div class="review-rating">
 														<i class="fa fa-star"></i>
 														<i class="fa fa-star"></i>
@@ -335,97 +322,137 @@
 	<!-- /container -->
 </div>
 <!-- /SECTION -->
-<!-- SweetAlert2 JS -->
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-  
-<script>// Add to cart
-	document.querySelectorAll('.add-to-cart-btn').forEach(button => {
-	  button.addEventListener('click', function() {
-		const productId = this.dataset.productId;
-		const quantity = document.getElementById('product-qty').value;
-		
-		fetch('/cart', {
-		  method: 'POST',
-		  headers: {
-			'Content-Type': 'application/json'
-		  },
-		  body: JSON.stringify({ productId, quantity })
-		})
-		.then(response => response.json())
-		.then(data => {
-		  if(data.success) {
-			Swal.fire({
-			  title: 'Added to Cart',
-			  text: 'The item has been added to your cart.',
-			  icon: 'success',
-			  confirmButtonText: 'OK'
-			});
-		  } else {
-			Swal.fire({
-			  title: 'Failed to Add to Cart',
-			  text: 'There was an issue adding the item to your cart.',
-			  icon: 'error',
-			  confirmButtonText: 'OK'
-			});
-		  }
-		})
-		.catch(error => {
-		  console.error('Error:', error);
-		  Swal.fire({
-			title: 'Error',
-			text: 'An error occurred while adding the item to your cart.',
-			icon: 'error',
-			confirmButtonText: 'OK'
-		  });
-		});
-	  });
-	});
-	
-	// Add to wishlist
-	
- 
-    // Add to wishlist functionality
-    document.querySelectorAll('.product-btns.fa-heart-o').forEach(button => {
-      button.addEventListener('click', function() {
-        const productId = this.closest('.product').querySelector('.add-to-cart-btn').dataset.productId;
-        const userId = this.dataset.userId;
 
-        fetch(`/wishlist/add/${userId}`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ productId })
-        })
-        .then(response => response.json())
-        .then(data => {
-          if (data.success) {
-            Swal.fire({
-              title: 'Added to Wishlist',
-              text: data.message,
-              icon: 'success',
-              confirmButtonText: 'OK'
+<%- include('footer.ejs') %>
+
+<script>
+	document.addEventListener('DOMContentLoaded', (event) => {
+    const addToCartButton = document.querySelector('.add-to-cart-btn');
+    const productQtyInput = document.getElementById('product-qty');
+    const qtyUpButton = document.querySelector('.qty-up');
+    const qtyDownButton = document.querySelector('.qty-down');
+    const wishlistButton = document.querySelector('.wishlist-btn');
+
+    if (addToCartButton && productQtyInput && qtyUpButton && qtyDownButton && wishlistButton) {
+        addToCartButton.addEventListener('click', (event) => {
+            const productId = addToCartButton.dataset.productId;
+            const qty = parseInt(productQtyInput.value, 10);
+            const maxQty = parseInt(productQtyInput.max, 10);
+
+            console.log(`Product ID: ${productId}, Quantity: ${qty}, Max Quantity: ${maxQty}`);
+
+            if (isNaN(qty) ) {
+                console.error('Invalid quantity input detected');
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Invalid quantity',
+                    text: `Please enter a quantity between 1 and ${maxQty}`,
+                });
+                return;
+            }
+			if ( 0 == maxQty ) {
+                console.error('Invalid quantity input detected');
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Out of Stock',
+                    text: `Please purachse another product`,
+                });
+                return;
+            }
+
+			if ( qty > maxQty) {
+                console.error('Invalid quantity input detected');
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Low stock',
+                    text: `Please enter a quantity between 1 and ${maxQty}`,
+                });
+                return;
+            }
+
+
+            fetch(`/cart/add/${productId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({quantity: qty }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Added to cart',
+                        showConfirmButton: false,
+                        timer: 1500
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Oops...',
+                        text: data.message
+                    });
+                }
+            })
+            .catch((error) => {
+                console.error('Error:', error);
             });
-          } else {
-            Swal.fire({
-              title: 'Failed to Add to Wishlist',
-              text: data.message,
-              icon: 'error',
-              confirmButtonText: 'OK'
-            });
-          }
-        })
-        .catch(error => {
-          console.error('Error:', error);
-          Swal.fire({
-            title: 'Error',
-            text: 'An error occurred while adding the item to your wishlist.',
-            icon: 'error',
-            confirmButtonText: 'OK'
-          });
         });
-      });
-    });
-	</script>
 
-<%- include ('footer.ejs')%>
+        qtyUpButton.addEventListener('click', () => {
+            let currentQty = parseInt(productQtyInput.value, 10);
+            const maxQty = parseInt(productQtyInput.max, 10);
+            if (currentQty < maxQty) {
+                productQtyInput.value = currentQty + 1;
+            }
+            console.log(`Quantity increased: ${productQtyInput.value}`);
+        });
+
+        qtyDownButton.addEventListener('click', () => {
+            let currentQty = parseInt(productQtyInput.value, 10);
+            if (currentQty > 1) {
+                productQtyInput.value = currentQty - 1;
+            }
+            console.log(`Quantity decreased: ${productQtyInput.value}`);
+        });
+
+        wishlistButton.addEventListener('click', (event) => {
+            event.preventDefault();
+            const productId = wishlistButton.dataset.productId;
+
+            fetch(`/wishlist/add/${productId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Added to wishlist',
+                        showConfirmButton: false,
+                        timer: 1500
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Oops...',
+                        text: data.message
+                    });
+                }
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });
+        });
+    } else {
+        console.error('One or more elements were not found in the DOM.');
+    }
+});
+
+
+	</script>
+	

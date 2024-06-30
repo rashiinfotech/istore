@@ -2,115 +2,117 @@
 <link href="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
 <script src="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js"></script>
 <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-
-<!------ Include the above in your HEAD tag ---------->
-
-<style>
-/* Add your styles here */
-
-<link href="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
-<script src="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js"></script>
-<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-
-<!------ Include the above in your HEAD tag ---------->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
 
 <style>
-/* Add your styles here */
-.cart-wrap {
-    padding: 40px 0;
-    font-family: 'Open Sans', sans-serif;
-}
-.main-heading {
-    font-size: 19px;
-    margin-bottom: 20px;
-}
-.table-wishlist table {
-    width: 100%;
-}
-.table-wishlist thead {
-    border-bottom: 1px solid #e5e5e5;
-    margin-bottom: 5px;
-}
-.table-wishlist thead tr th {
-    padding: 8px 0 18px;
-    color: #484848;
-    font-size: 15px;
-    font-weight: 400;
-}
-.table-wishlist tr td {
-    padding: 25px 0;
-    vertical-align: middle;
-}
-.table-wishlist tr td .img-product {
-    width: 72px;
-    float: left;
-    margin-left: 8px;
-    margin-right: 31px;
-    line-height: 63px;
-}
-.table-wishlist tr td .img-product img {
-    width: 100%;
-}
-.table-wishlist tr td .name-product {
-    font-size: 15px;
-    color: #484848;
-    padding-top: 8px;
-    line-height: 24px;
-    width: 50%;
-}
-.table-wishlist tr td.price {
-    font-weight: 600;
-}
-.total {
-    font-size: 24px;
-    font-weight: 600;
-    color: #8660e9;
-}
-.display-flex {
-    display: flex;
-}
-.align-center {
-    align-items: center;
-}
-.round-black-btn {
-    border-radius: 25px;
-    background: #212529;
-    color: #fff;
-    padding: 5px 20px;
-    display: inline-block;
-    border: solid 2px #212529; 
-    transition: all 0.5s ease-in-out 0s;
-    cursor: pointer;
-    font-size: 14px;
-}
-.round-black-btn:hover,
-.round-black-btn:focus {
-    background: transparent;
-    color: #212529;
-    text-decoration: none;
-}
-.mb-10 {
-    margin-bottom: 10px !important;
-}
-.mt-30 {
-    margin-top: 30px !important;
-}
-.d-block {
-    display: block;
-}
-.in-stock-box {
-    background: #ff0000;
-    font-size: 12px;
-    text-align: center;
-    border-radius: 25px;
-    padding: 4px 15px;
-    display: inline-block;  
-    color: #fff;
-}
-.trash-icon {
-    font-size: 20px;
-    color: #212529;
-}
+    .cart-wrap {
+        padding: 40px 0;
+        font-family: 'Open Sans', sans-serif;
+    }
+    .main-heading {
+        font-size: 19px;
+        margin-bottom: 20px;
+    }
+    .table-wishlist table {
+        width: 100%;
+    }
+    .table-wishlist thead {
+        border-bottom: 1px solid #e5e5e5;
+        margin-bottom: 5px;
+    }
+    .table-wishlist thead tr th {
+        padding: 8px 0 18px;
+        color: #484848;
+        font-size: 15px;
+        font-weight: 400;
+    }
+    .table-wishlist tr td {
+        padding: 25px 0;
+        vertical-align: middle;
+    }
+    .table-wishlist tr td .img-product {
+        width: 72px;
+        float: left;
+        margin-left: 8px;
+        margin-right: 31px;
+        line-height: 63px;
+    }
+    .table-wishlist tr td .img-product img {
+        width: 100%;
+    }
+    .table-wishlist tr td .name-product {
+        font-size: 15px;
+        color: #484848;
+        padding-top: 8px;
+        line-height: 24px;
+        width: 50%;
+    }
+    .table-wishlist tr td.price {
+        font-weight: 600;
+    }
+    .total {
+        font-size: 24px;
+        font-weight: 600;
+        color: #8660e9;
+    }
+    .display-flex {
+        display: flex;
+    }
+    .align-center {
+        align-items: center;
+    }
+    .round-black-btn {
+        border-radius: 25px;
+        background: #212529;
+        color: #fff;
+        padding: 5px 20px;
+        display: inline-block;
+        border: solid 2px #212529; 
+        transition: all 0.5s ease-in-out 0s;
+        cursor: pointer;
+        font-size: 14px;
+    }
+    .round-black-btn:hover,
+    .round-black-btn:focus {
+        background: transparent;
+        color: #212529;
+        text-decoration: none;
+    }
+    .mb-10 {
+        margin-bottom: 10px !important;
+    }
+    .mt-30 {
+        margin-top: 30px !important;
+    }
+    .d-block {
+        display: block;
+    }
+    .in-stock-box {
+        font-size: 12px;
+        text-align: center;
+        border-radius: 25px;
+        padding: 4px 15px;
+        display: inline-block;  
+        color: #fff;
+    }
+    .in-stock {
+        background: #808080; /* Gray for in stock */
+    }
+    .out-of-stock {
+        background: #ff0000; /* Red for out of stock */
+    }
+    .trash-icon {
+        font-size: 20px;
+        color: #212529;
+        cursor: pointer; /* Ensure it's clickable */
+    }
+    .empty-wishlist {
+        text-align: center;
+        font-size: 18px;
+        color: #484848;
+        margin-top: 20px;
+    }
 </style>
 
 <div class="cart-wrap">
@@ -119,6 +121,12 @@
             <div class="col-md-12">
                 <div class="main-heading mb-10">My wishlist</div>
                 <div class="table-wishlist">
+                    <% if (products.length === 0) { %>
+                        <div class="empty-wishlist">
+                            Your wishlist is empty.<br>
+                            <a href="/" class="round-black-btn mt-30">Continue Shopping</a>
+                        </div>
+                    <% } else { %>
                     <table cellpadding="0" cellspacing="0" border="0" width="100%">
                         <thead>
                             <tr>
@@ -131,7 +139,7 @@
                         </thead>
                         <tbody>
                             <% products.forEach(product => { %>
-                            <tr>
+                            <tr id="product-<%= product._id %>">
                                 <td width="45%">
                                     <div class="display-flex align-center">
                                         <div class="img-product">
@@ -143,26 +151,44 @@
                                     </div>
                                 </td>
                                 <td width="15%" class="price">₹ <%= product.price %></td>
-                                <td width="15%"><span class="in-stock-box"><%= product.stock > 0 ? 'In Stock' : 'Out of Stock' %></span></td>
+                                <td width="15%"><span class="in-stock-box <%= product.stock > 0 ? 'in-stock' : 'out-of-stock' %>"><%= product.stock > 0 ? 'In Stock' : 'Out of Stock' %></span></td>
                                 <td width="15%">
-                                    <form action="/cart/add/<%= product._id %>" method="POST">
-                                        <input type="hidden" name="quantity" value="1"> <!-- Default quantity -->
-                                        <button type="submit" class="round-black-btn small-btn">Add to Cart</button>
-                                    </form>
+                                    <% if (product.stock > 0) { %>
+                                        <button type="button" class="round-black-btn small-btn" onclick="addItemToCart('<%= product._id %>')">Add to Cart</button>
+                                    <% } else { %>
+                                        <button type="button" class="round-black-btn small-btn" disabled>Out of Stock</button>
+                                    <% } %>
                                 </td>
-                                
-                                <td width="10%" class="text-center"><a href="#" class="trash-icon"><i class="far fa-trash-alt"></i></a></td>
+                                <td width="10%" class="text-center">
+                                    <a href="javascript:void(0);" class="trash-icon" onclick="deleteItem('<%= product._id %>')">
+                                        <i class="far fa-trash-alt"></i>
+                                    </a>
+                                </td>
                             </tr>
                             <% }); %>
                         </tbody>
                     </table>
+                    <% } %>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
 <script>
+    function checkIfWishlistIsEmpty() {
+        if (document.querySelectorAll('.table-wishlist tbody tr').length === 0) {
+            document.querySelector('.table-wishlist').innerHTML = `
+                <div class="empty-wishlist">
+                    Your wishlist is empty.<br>
+                    <a href="/" class="round-black-btn mt-30">Continue Shopping</a>
+                </div>
+            `;
+        }
+    }
+
     function deleteItem(itemId) {
+        console.log("Delete function called for item: " + itemId); // Debugging line
         Swal.fire({
             title: 'Are you sure?',
             text: 'You will not be able to recover this item!',
@@ -172,8 +198,64 @@
             cancelButtonText: 'No, keep it'
         }).then((result) => {
             if (result.isConfirmed) {
-                window.location.href = '/wishlist/<%= userId %>/delete/' + itemId;
+                fetch(`/wishlist/<%= userId %>/delete/${itemId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        document.getElementById(`product-${itemId}`).remove();
+                        Swal.fire('Deleted!', data.message, 'success');
+                        checkIfWishlistIsEmpty();
+                    } else {
+                        Swal.fire('Error!', data.message, 'error');
+                    }
+                })
+                .catch(error => {
+                    Swal.fire('Error!', 'Failed to delete item from wishlist', 'error');
+                });
             }
+        });
+    }
+
+    function addItemToCart(productId) {
+        fetch(`/cart/add/${productId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ quantity: 1 }) // Default quantity
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                fetch(`/wishlist/<%= userId %>/delete/${productId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(deleteData => {
+                    if (deleteData.success) {
+                        const wishlistItem = document.getElementById(`product-${productId}`);
+                        wishlistItem.remove();
+                        checkIfWishlistIsEmpty();
+                    }
+                    Swal.fire('Success!', data.message, 'success');
+                })
+                .catch(error => {
+                    Swal.fire('Error!', 'Failed to delete item from wishlist', 'error');
+                });
+            } else {
+                Swal.fire('Error!', data.message, 'error');
+            }
+        })
+        .catch(error => {
+            Swal.fire('Error!', 'Failed to add item to cart', 'error');
         });
     }
 </script>

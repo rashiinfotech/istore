@@ -1,11 +1,13 @@
 const express = require('express');
 const { adminmgmtGet, adminLogin, adminLoginPost, logoutAdmin, userManagment, addItem, blockUser, addUser, unblockUser,
     postAddUser,
-    userOrders,
+    userOrders,coupons,addCoupons,addCouponsPage,deleteCoupon,editCouponpage,
+    updateCoupon,
     viewOrder, updateOrderStatus,
 stock } = require('../controller/adminController/adminController');
 const { catList , addCat, submitCat, blockCat, editCat, deleteCat,unblockCat ,updateCat} = require('../controller/adminController/categoryController');
-const { submitItems, getsubmitItems, itemsList,updateImage, itemEditor, updateProduct, deleteProduct, activateProduct ,deleteImage ,productImgEditor,
+const { submitItems,
+     getsubmitItems, itemsList,updateImage, itemEditor, updateProduct, deleteProduct, activateProduct ,deleteImage ,productImgEditor,
    
  } = require('../../server/controller/adminController/productController');
 const adminRouter = express.Router();
@@ -55,9 +57,11 @@ adminRouter.get('/item-editor/:productId', itemEditor)
 adminRouter.post('/update-product/:productId',upload.array('image'), updateProduct);
 adminRouter.get('/unlist-product/:productId', deleteProduct);
 adminRouter.get('/list-product/:productId',activateProduct);
+
+
+
 // Server-side route for updating product
 adminRouter.put('/admin/update-product/:productId', updateProduct);
-
 // Server-side route for deleting image
 adminRouter.delete('/admin/delete-image/:productId/:imageIndex', deleteImage);
 adminRouter.get('/product-img-editor',productImgEditor)
@@ -66,6 +70,13 @@ adminRouter.get('/Stock', stock)
 adminRouter.get('/order-details/:orderId',viewOrder);
 adminRouter.post('/orders/:orderId/status', updateOrderStatus);
 
+//COUPONS
+adminRouter.get('/coupons', coupons)
+adminRouter.get('/add-coupon', addCouponsPage)
+adminRouter.post('/add-coupons', addCoupons);
+adminRouter.post('/delete-coupon/:couponId',deleteCoupon)
+adminRouter.get('/edit-coupon/:couponId',editCouponpage)
+adminRouter.post('/update-coupon/:couponId',updateCoupon)
 
 
 

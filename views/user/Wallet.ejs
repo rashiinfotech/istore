@@ -1,26 +1,134 @@
-<%- include ("header.ejs") %>
+<%- include("header.ejs") %>
 
-<h1>Wallet</h1>
+<style>
+    /* Basic CSS styling for wallet page */
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f0f0f0;
+        margin: 0;
+        padding: 0;
+    }
 
-<div class="wallet-info">
-    <p>User: <%= user.username %></p>
-    <p>Balance: <%= user.walletBalance %></p>
-</div>
+    .containerr {
+        max-width: 800px;
+        margin: 20px auto;
+        background-color: #fff;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
 
-<div class="transaction-history">
-    <h2>Transaction History</h2>
-    <ul>
-        <% user.walletHistory.forEach(transaction => { %>
-            <li>
-                <p><strong>Transaction:</strong> <%= transaction.transaction %></p>
-                <p><strong>Amount:</strong> <%= transaction.amount %></p>
-                <p><strong>Date:</strong> <%= transaction.date %></p>
-                <% if (transaction.reason) { %>
-                    <p><strong>Reason:</strong> <%= transaction.reason %></p>
-                <% } %>
-            </li>
-        <% }); %>
-    </ul>
-</div>
+    .containerr header {
+        text-align: center;
+        margin-bottom: 20px;
+    }
 
-<%- include ("footer.ejs") %>
+    .containerr header h1 {
+        color: #333;
+    }
+
+    .containerr main {
+        padding: 20px;
+    }
+
+    .wallet-balance {
+        margin-bottom: 30px;
+        border-bottom: 1px solid #ccc;
+        padding-bottom: 20px;
+    }
+
+    .wallet-balance h2 {
+        color: #333;
+    }
+
+    .balance-amount {
+        font-size: 24px;
+        font-weight: bold;
+        color: #4CAF50; /* Green color for balance amount */
+    }
+
+    .transaction-history {
+        margin-top: 20px;
+    }
+
+    .transaction-history h2 {
+        color: #333;
+    }
+
+    .transactions-list {
+        list-style-type: none;
+        padding: 0;
+    }
+
+    .transactions-list li {
+        padding: 10px 0;
+        border-bottom: 1px solid #eee;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .transaction-amount {
+        font-weight: bold;
+        font-size: 16px;
+    }
+
+    .credit {
+        color: #4CAF50; /* Green color for credit transactions */
+    }
+
+    .debit {
+        color: #F44336; /* Red color for debit transactions */
+    }
+
+    .transaction-description {
+        flex: 1;
+        padding-left: 10px;
+    }
+</style>
+
+<body>
+    <div class="containerr">
+        <header>
+            <h1>Your Wallet</h1>
+        </header>
+
+        <main>
+            <section class="wallet-balance">
+                <h2>Current Balance</h2>
+                <div class="balance-amount">
+                    ₹ <%= wallet.balance.toFixed(2) %> <!-- Display the wallet balance -->
+                </div>
+            </section>
+
+            <section class="transaction-history">
+                <h2>Transaction History</h2>
+                <ul class="transactions-list">
+                    <% if (wallet.transactions.length === 0) { %>
+                        <li>No transactions yet.</li>
+                    <% } else { %>
+                        <% wallet.transactions.forEach(transaction => { %>
+                            <li>
+                                <span class="transaction-amount <%= transaction.type === 'credit' ? 'credit' : 'debit' %>">
+                                    <%= transaction.type === 'credit' ? '+' : '-' %> ₹ <%= transaction.amount.toFixed(2) %>
+                                </span>
+                                
+                                <span class="transaction-description">
+                                    <% if (transaction.orderId) { %>
+                                       
+                                            <%= transaction.description %> (Order ID: <%= transaction.orderId %>)
+                                        
+                                    <% } else { %>
+                                        <%= transaction.description %>
+                                    <% } %></a>
+                                </span>
+                            </li>
+                        <% }); %>
+                    <% } %>
+                </ul>
+            </section>
+        </main>
+    </div>
+
+    <%- include("footer.ejs") %>
+</body>

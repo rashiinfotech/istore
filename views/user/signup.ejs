@@ -11,7 +11,7 @@
     <link rel="stylesheet" href="../../static/css/app.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <!-- Include the Google Sign-In JavaScript SDK -->
-    <script src="https://apis.google.com/js/platform.js" async defer></script>
+
 </head>
 <style>
     .logo img {
@@ -22,6 +22,14 @@
       justify-content: center;
       margin-bottom: 150px;
     }
+    .auth-container {
+  width: 450px;
+  min-height: 330px;
+  position: absolute;
+  top: 63%;
+  left: 50%;
+  -webkit-transform: translateY(-50%) translateX(-50%);
+          transform: translateY(-50%) translateX(-50%); }
     .auth-title {
       display: flex;
       
@@ -41,7 +49,8 @@
                     <h1 class="auth-title">
                         <div class="logo">
                             <img src="../../static/img/logo black small .png" alt="Logo">
-                        </div> User Signup
+                          </div>
+                          User Signup
                     </h1>
                 </header>
                 <div class="auth-content">
@@ -121,9 +130,7 @@
                     </form>
 
                     <!-- Add a button for signing in with Google -->
-                    <div class="text-center">google sign
-                        <div class="g-signin2" data-onsuccess="onSignIn">VVV</div>
-                    </div>
+                    
                 </div>
             </div>
         </div>
@@ -136,17 +143,7 @@
         </div>
     </div>
     <script>
-        // Google Sign-In callback function
-        function onSignIn(googleUser) {
-            // Retrieve user information from Google Sign-In instance
-            var profile = googleUser.getBasicProfile();
-            var idToken = googleUser.getAuthResponse().id_token;
-
-            // Send idToken to backend for verification and further processing
-            // Example: sendToBackend(idToken);
-            console.log("ID Token:", idToken);
-        }
-
+       
         document.getElementById('send-otp').addEventListener('click', async function () {
             this.disabled = true; // Disable the button to prevent multiple clicks
 

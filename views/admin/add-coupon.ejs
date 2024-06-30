@@ -1,0 +1,126 @@
+<%- include("adminHead.ejs") %>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+<style>
+    .form-container {
+        background-color: #f9f9f9;
+        padding: 20px;
+        border-radius: 5px;
+    }
+
+    .form-title {
+        margin-bottom: 20px;
+    }
+
+  
+</style>
+
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
+<div class="sidebar-mobile-menu-handle" id="sidebar-mobile-menu-handle"></div>
+<div class="mobile-menu-handle"></div>
+<article class="content form-container">
+    <div class="title-block">
+        <h3 class="title form-title">Add New Coupon</h3>
+        <a href="/admin/coupons" class="btn btn-primary" >Back to Coupons</a>
+
+
+    <% if (successMessage) { %>
+        <div class="alert alert-success" role="alert">
+            <%= successMessage %>
+        </div>
+    <% } %>
+
+    <% if (errorMessage) { %>
+        <div class="alert alert-danger" role="alert">
+            <%= errorMessage %>
+        </div>
+    <% } %> 
+
+    <form action="/admin/add-coupons" method="POST" id="addCouponForm">
+        <div class="form-group">
+            <label for="couponCode">Coupon Code</label>
+            <input type="text" class="form-control <%= errorMessage && errorMessage.field === 'couponCode' ? 'is-invalid' : '' %>" id="couponCode" name="couponCode" value="<%= typeof couponCode !== 'undefined' ? couponCode : '' %>" required>
+            <% if (errorMessage && errorMessage.field === 'couponCode') { %>
+                <div class="invalid-feedback">
+                    <%= errorMessage.message %>
+                </div>
+            <% } %>
+        </div>
+        <div class="form-group">
+            <label for="type">Type</label>
+            <input type="text" class="form-control <%= errorMessage && errorMessage.field === 'type' ? 'is-invalid' : '' %>" id="type" name="type" required>
+            <% if (errorMessage && errorMessage.field === 'type') { %>
+                <div class="invalid-feedback">
+                    <%= errorMessage.message %>
+                </div>
+            <% } %>
+        </div>
+        <div class="form-group">
+            <label for="discount">Discount (%)</label>
+            <input type="number" class="form-control <%= errorMessage && errorMessage.field === 'discount' ? 'is-invalid' : '' %>" id="discount" name="discount" required>
+            <% if (errorMessage && errorMessage.field === 'discount') { %>
+                <div class="invalid-feedback">
+                    <%= errorMessage.message %>
+                </div>
+            <% } %>
+        </div>
+        <div class="form-group">
+            <label for="expiry">Expiration Date</label>
+            <input type="date" class="form-control <%= errorMessage && errorMessage.field === 'expiry' ? 'is-invalid' : '' %>" id="expiry" name="expiry" required>
+            <% if (errorMessage && errorMessage.field === 'expiry') { %>
+                <div class="invalid-feedback">
+                    <%= errorMessage.message %>
+                </div>
+            <% } %>
+        </div>
+        <div class="form-group">
+            <label for="maxRedeem">Maximum Redemption</label>
+            <input type="number" class="form-control <%= errorMessage && errorMessage.field === 'maxRedeem' ? 'is-invalid' : '' %>" id="maxRedeem" name="maxRedeem" required>
+            <% if (errorMessage && errorMessage.field === 'maxRedeem') { %>
+                <div class="invalid-feedback">
+                    <%= errorMessage.message %>
+                </div>
+            <% } %>
+        </div>
+        <div class="form-group">
+            <label for="minimumPrice">Minimum Price</label>
+            <input type="number" class="form-control <%= errorMessage && errorMessage.field === 'minimumPrice' ? 'is-invalid' : '' %>" id="minimumPrice" name="minimumPrice" required>
+            <% if (errorMessage && errorMessage.field === 'minimumPrice') { %>
+                <div class="invalid-feedback">
+                    <%= errorMessage.message %>
+                </div>
+            <% } %>
+        </div>
+        <div class="form-group">
+            <label for="status">Status</label>
+            <select class="form-control <%= errorMessage && errorMessage.field === 'status' ? 'is-invalid' : '' %>" id="status" name="status" required>
+                <option value="">Select Status</option>
+                <option value="true">Active</option>
+                <option value="false">Inactive</option>
+            </select>
+            <% if (errorMessage && errorMessage.field === 'status') { %>
+                <div class="invalid-feedback">
+                    <%= errorMessage.message %>
+                </div>
+            <% } %>
+        </div>
+        <button type="submit" class="btn btn-primary">Add Coupon</button>
+    </form>
+</article>
+
+<%- include("adminFooter.ejs") %>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script>
+    // Example script to clear validation styles on input change
+    document.addEventListener('DOMContentLoaded', function() {
+        const inputs = document.querySelectorAll('.form-control');
+        inputs.forEach(input => {
+            input.addEventListener('input', function() {
+                if (input.classList.contains('is-invalid')) {
+                    input.classList.remove('is-invalid');
+                    input.nextElementSibling.innerHTML = ''; // Clear error message
+                }
+            });
+        });
+    });
+</script>

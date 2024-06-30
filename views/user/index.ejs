@@ -28,17 +28,16 @@
         <div id="responsive-nav">
             <ul class="main-nav nav navbar-nav">
                 <li class="active"><a href="/">Home</a></li>
-                <li><a href='/'>Hot Deals</a></li>
+                <li><a href='/store'>Hot Deals</a></li>
                 <li><a href="/store">Categories</a></li>
-                <li><a href="/product">Laptops</a></li>
-                <li><a href="/product">Smartphones</a></li>
-                <li><a href="/product">Cameras</a></li>
-                <li><a href="/product">Accessories</a></li>
+                <li><a href="/store">Laptops</a></li>
+                <li><a href="/store">Smartphones</a></li>
+                <li><a href="/store">Cameras</a></li>
+                <li><a href="/store">Accessories</a></li>
             </ul>
         </div>
     </div>
 </nav>
-<!-- /NAVIGATION -->
 
 <!-- SECTION -->
 <div class="section">
@@ -106,57 +105,63 @@
                 </div>
             </div>
 
-            <!-- Products tab & slick -->
-            <div class="col-md-12">
-                <div class="row">
-                    <div class="products-tabs">
-                        <div id="tab1" class="tab-pane active">
-                            <div class="products-slick" data-nav="#slick-nav-1">
-                                <% products.forEach(product => { %>
-                                <div class="product">
-                                    <a href="/product/<%= product.id %>" class="product-link">
-                                        <div class="product-img">
-                                            <img src="/<%= product.image[0] %>" alt="<%= product.name %>">
-                                        </div>
-                                        <div class="product-body">
-                                            <p class="product-category"><%= product?.category?.name %></p>
-                                            <h3 class="product-name"><a href="#"><%= product.name %></a></h3>
-                                            <h4 class="product-price">₹ <%= product.price %> <% if(product.oldPrice) { %><del class="product-old-price">₹ <%= product.oldPrice %></del><% } %></h4>
-                                            <% if (product.stock === 0) { %>
-                                                <span class="sold-out">Sold Out</span>
-                                            <% } else { %>
-                                                <span class="stock-info">Only <%= product.stock %> left in stock</span>
-                                            <% } %>
-                                            <% if (product.rating) { %>
-                                                <div class="product-rating">
-                                                    <% for (let i = 0; i < product.rating; i++) { %>
-                                                        <i class="fa fa-star"></i>
-                                                    <% } %>
-                                                    <% for (let i = 0; i < 5 - product.rating; i++) { %>
-                                                        <i class="fa fa-star-o"></i>
-                                                    <% } %>
-                                                </div>
-                                            <% } %>
-                                            <div class="product-btns">
-                                                <button class="add-to-wishlist" data-product-id="<%= product._id %>">
-                                                    <span class="wishlist-icon fa fa-heart-o"></span><span class="tooltipp">add to wishlist</span>
-                                                </button>
-                                                <button class="add-to-compare"><i class="fa fa-exchange"></i><span class="tooltipp">add to compare</span></button>
-                                                <button class="quick-view"><i class="fa fa-eye"></i><span class="tooltipp">quick view</span></button>
-                                            </div>
-                                        </div>
-                                    </a>
-                                    <div class="add-to-cart">
-                                        <button class="add-to-cart-btn" data-product-id="<%= product._id %>"><i class="fa fa-shopping-cart"></i> add to cart</button>
-                                    </div>
-                                </div>
-                                <% }); %> 
+          <!-- Products tab & slick -->
+<div class="col-md-12">
+    <div class="row">
+        <div class="products-tabs">
+            <div id="tab2" class="tab-pane fade in active">
+                <div class="products-slick" data-nav="#slick-nav-2">
+                    <% products.forEach(product => { %>
+                    <div class="product">
+                        <a href="/product/<%= product._id %>" class="product-link">
+                            <div class="product-img">
+                                <img src="/<%= product.image[0] %>" alt="<%= product.name %>">
                             </div>
+                            <div class="product-body">
+                                <p class="product-category"><%= product?.category?.name %></p>
+                                <h3 class="product-name"><a href="#"><%= product.name %></a></h3>
+                                <h4 class="product-price">₹ <%= product.price %> <% if(product.oldPrice) { %><del class="product-old-price">₹ <%= product.oldPrice %></del><% } %></h4>
+                                <% if (product.stock === 0) { %>
+                                    <span class="sold-out">Sold Out</span>
+                                <% } else { %>
+                                    <span class="stock-info">Only <%= product.stock %> left in stock</span>
+                                <% } %>
+                                <% if (product.rating) { %>
+                                    <div class="product-rating">
+                                        <% for (let i = 0; i < product.rating; i++) { %>
+                                            <i class="fa fa-star"></i>
+                                        <% } %>
+                                        <% for (let i = 0; i < 5 - product.rating; i++) { %>
+                                            <i class="fa fa-star-o"></i>
+                                        <% } %>
+                                    </div>
+                                <% } %>
+                                <div class="product-btns">
+                                    <button class="add-to-wishlist" data-product-id="<%= product._id %>">
+                                        <span class="wishlist-icon fa fa-heart-o"></span><span class="tooltipp">add to wishlist</span>
+                                    </button>
+                                    <button class="add-to-compare"><i class="fa fa-exchange"></i><span class="tooltipp">add to compare</span></button>
+                                    <button class="quick-view"><i class="fa fa-eye"></i><span class="tooltipp">quick view</span></button>
+                                </div>
+                            </div>
+                        </a>
+                        <div class="add-to-cart">
+                            <% if (product.stock > 0) { %>
+                                <input type="hidden" id="product-qty-<%= product._id %>" value="1" max="<%= product.stock %>">
+                                <button class="add-to-cart-btn" data-product-id="<%= product._id %>"><i class="fa fa-shopping-cart"></i> add to cart</button>
+                            <% } else { %>
+                                <button class="add-to-cart-btn disabled" disabled><i class="fa fa-shopping-cart"></i> Sold Out</button>
+                            <% } %>
                         </div>
                     </div>
+                    <% }); %>
                 </div>
             </div>
-            <!-- /Products tab & slick -->
+        </div>
+    </div>
+</div>
+<!-- /Products tab & slick -->
+
         </div>
     </div>
 </div>
@@ -222,57 +227,62 @@
                 </div>
             </div>
             <!-- Products tab & slick -->
-            <div class="col-md-12">
-                <div class="row">
-                    <div class="products-tabs">
-                        <div id="tab2" class="tab-pane fade in active">
-                            <div class="products-slick" data-nav="#slick-nav-2">
-                                <% products.forEach(product => { %>
-                                <div class="product">
-                                    <a href="/product/<%= product._id %>" class="product-link">
-                                        <div class="product-img">
-                                            <img src="/<%= product.image[0] %>" alt="<%= product.name %>">
-                                        </div>
-                                        <div class="product-body">
-                                            <p class="product-category"><%= product?.category?.name %></p>
-                                            <h3 class="product-name"><a href="#"><%= product.name %></a></h3>
-                                            <h4 class="product-price">₹ <%= product.price %> <% if(product.oldPrice) { %><del class="product-old-price">₹ <%= product.oldPrice %></del><% } %></h4>
-                                            <% if (product.stock === 0) { %>
-                                                <span class="sold-out">Sold Out</span>
-                                            <% } else { %>
-                                                <span class="stock-info">Only <%= product.stock %> left in stock</span>
-                                            <% } %>
-                                            <% if (product.rating) { %>
-                                                <div class="product-rating">
-                                                    <% for (let i = 0; i < product.rating; i++) { %>
-                                                        <i class="fa fa-star"></i>
-                                                    <% } %>
-                                                    <% for (let i = 0; i < 5 - product.rating; i++) { %>
-                                                        <i class="fa fa-star-o"></i>
-                                                    <% } %>
-                                                </div>
-                                            <% } %>
-                                            <div class="product-btns">
-                                                <button class="add-to-wishlist" data-product-id="<%= product._id %>">
-                                                    <span class="wishlist-icon fa fa-heart-o"></span><span class="tooltipp">add to wishlist</span>
-                                                </button>
-                                                <button class="add-to-compare"><i class="fa fa-exchange"></i><span class="tooltipp">add to compare</span></button>
-                                                <button class="quick-view"><i class="fa fa-eye"></i><span class="tooltipp">quick view</span></button>
-                                            </div>
-                                        </div>
-                                    </a>
-                                    <div class="add-to-cart">
-                                        <button class="add-to-cart-btn" data-product-id="<%= product._id %>"><i class="fa fa-shopping-cart"></i> add to cart</button>
-
-                                    </div>
-                                </div>
-                                <% }); %>
+<div class="col-md-12">
+    <div class="row">
+        <div class="products-tabs">
+            <div id="tab2" class="tab-pane fade in active">
+                <div class="products-slick" data-nav="#slick-nav-2">
+                    <% products.forEach(product => { %>
+                    <div class="product">
+                        <a href="/product/<%= product._id %>" class="product-link">
+                            <div class="product-img">
+                                <img src="/<%= product.image[0] %>" alt="<%= product.name %>">
                             </div>
+                            <div class="product-body">
+                                <p class="product-category"><%= product?.category?.name %></p>
+                                <h3 class="product-name"><a href="#"><%= product.name %></a></h3>
+                                <h4 class="product-price">₹ <%= product.price %> <% if(product.oldPrice) { %><del class="product-old-price">₹ <%= product.oldPrice %></del><% } %></h4>
+                                <% if (product.stock === 0) { %>
+                                    <span class="sold-out">Sold Out</span>
+                                <% } else { %>
+                                    <span class="stock-info">Only <%= product.stock %> left in stock</span>
+                                <% } %>
+                                <% if (product.rating) { %>
+                                    <div class="product-rating">
+                                        <% for (let i = 0; i < product.rating; i++) { %>
+                                            <i class="fa fa-star"></i>
+                                        <% } %>
+                                        <% for (let i = 0; i < 5 - product.rating; i++) { %>
+                                            <i class="fa fa-star-o"></i>
+                                        <% } %>
+                                    </div>
+                                <% } %>
+                                <div class="product-btns">
+                                    <button class="add-to-wishlist" data-product-id="<%= product._id %>">
+                                        <span class="wishlist-icon fa fa-heart-o"></span><span class="tooltipp">add to wishlist</span>
+                                    </button>
+                                    <button class="add-to-compare"><i class="fa fa-exchange"></i><span class="tooltipp">add to compare</span></button>
+                                    <button class="quick-view"><i class="fa fa-eye"></i><span class="tooltipp">quick view</span></button>
+                                </div>
+                            </div>
+                        </a>
+                        <div class="add-to-cart">
+                            <% if (product.stock > 0) { %>
+                                <input type="hidden" id="product-qty-<%= product._id %>" value="1" max="<%= product.stock %>">
+                                <button class="add-to-cart-btn" data-product-id="<%= product._id %>"><i class="fa fa-shopping-cart"></i> add to cart</button>
+                            <% } else { %>
+                                <button class="add-to-cart-btn disabled" disabled><i class="fa fa-shopping-cart"></i> Sold Out</button>
+                            <% } %>
                         </div>
                     </div>
+                    <% }); %>
                 </div>
             </div>
-            <!-- /Products tab & slick -->
+        </div>
+    </div>
+</div>
+<!-- /Products tab & slick -->
+
         </div>
     </div>
 </div>
@@ -364,42 +374,54 @@
     });
     
     document.querySelectorAll('.add-to-cart-btn').forEach(button => {
-        button.addEventListener('click', async (event) => {
-            event.preventDefault();
-            const productId = button.dataset.productId;
-            try {
-                const response = await fetch(`/cart/add/${productId}`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ quantity: 1 }) // Assuming you want to add 1 item at a time
+    button.addEventListener('click', async (event) => {
+        event.preventDefault();
+        const productId = button.dataset.productId;
+        const productQtyInput = document.getElementById(`product-qty-${productId}`); // Adjusted to dynamically fetch the correct product quantity input
+        const maxQty = parseInt(productQtyInput.max, 10);
+
+        if (maxQty === 0) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Out of Stock',
+                text: 'This product is currently out of stock.',
+            });
+            return;
+        }
+
+        try {
+            const response = await fetch(`/cart/add/${productId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ quantity: 1 }) // Assuming you want to add 1 item at a time
+            });
+
+            const data = await response.json();
+            if (data.success) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Added to Cart!',
+                    text: 'Product added to cart successfully.'
                 });
-                const text = await response.text();
-                console.log('Response text:', text);
-                const data = JSON.parse(text); // This will throw an error if the response is not JSON
-                if (data.success) {
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Added to Cart!',
-                        text: 'Product added to cart successfully.'
-                    });
-                } else {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: 'Failed to add product to cart.'
-                    });
-                }
-            } catch (error) {
-                console.error('Error:', error);
+            } else {
                 Swal.fire({
                     icon: 'error',
                     title: 'Error',
                     text: 'Failed to add product to cart.'
                 });
             }
-        });
+        } catch (error) {
+            console.error('Error:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Failed to add product to cart.'
+            });
+        }
     });
+});
+
     </script>
     

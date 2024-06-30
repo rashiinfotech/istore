@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #fff;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .header {
+            background-color: #007bff;
+            color: #fff;
+            font-size: 28px;
+            font-weight: bold;
+            text-align: center;
+            padding: 20px 0;
+            margin: 0;
+        }
+        .content {
+            padding: 20px;
+        }
+        .content div {
+            margin-bottom: 10px;
+        }
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        .items-table th, .items-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        .items-table th {
+            background-color: #f2f2f2;
+        }
+        .items-table td:first-child {
+            width: 50px; /* Adjust width of serial number column */
+        }
+        .total {
+            margin-top: 20px;
+            text-align: right;
+        }
+        .total span {
+            display: block;
+            font-size: 20px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">Invoice</div>
+        <div class="content">
+            <div><strong>Order ID:</strong> <%= order.orderId %></div>
+            <div><strong>Payment Method:</strong> <%= order.payment %></div>
+            <div><strong>Order Date:</strong> <%= new Date(order.createdAt).toDateString() %></div>
+            <div><strong>Customer Details:</strong></div>
+            <div><strong>Name:</strong> <%= order.userId.username %></div>
+
+            <% if (billAddress) { %>
+                <div><strong>Billing Address:</strong>
+                    <p><%= billAddress.addressLine1 %></p>
+                    <p><%= billAddress.street %></p>
+                    <p><%= billAddress.city %>, <%= billAddress.state %></p>
+                    <p><%= billAddress.ZIP %></p>
+                    <p><%= billAddress.country %></p>
+                </div>
+            <% } else { %>
+                <div><strong>Billing Address:</strong> Not available</div>
+            <% } %>
+
+            <% if (shipAddress) { %>
+                <div><strong>Shipping Address:</strong>
+                    <p><%= shipAddress.addressLine1 %></p>
+                    <p><%= shipAddress.street %></p>
+                    <p><%= shipAddress.city %>, <%= shipAddress.state %></p>
+                    <p><%= shipAddress.ZIP %></p>
+                    <p><%= shipAddress.country %></p>
+                </div>
+            <% } else { %>
+                <div><strong>Shipping Address:</strong> Not available</div>
+            <% } %>
+            
+            <div><strong>Contact Number:</strong> <%= order.userId.phone %></div>
+            <div><strong>Order Items:</strong></div>
+            <table class="items-table">
+                <thead>
+                    <tr>
+                        <th>Serial No.</th>
+                        <th>Product</th>
+                        <th>Quantity</th>
+                        <th>Price</th>
+                        <th>Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% order.items.forEach((item, index) => { %>
+                        <% const product = productMap[item.productId.toString()]; %>
+                        <tr>
+                            <td><%= index + 1 %></td>
+                            <td><%= product ? product.name : 'Product not available' %></td>
+                            <td><%= item.quantity %></td>
+                            <td>₹<%= item.price %></td>
+                            <td>₹<%= item.quantity * item.price %></td>
+                        </tr>
+                    <% }); %>
+                </tbody>
+            </table>
+            <div class="total">
+                <span><strong>Total Amount:</strong> ₹<%= order.amount %></span>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
