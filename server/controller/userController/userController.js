@@ -169,6 +169,7 @@ const signupPost = async (req, res) => {
     }
 };
 
+
 const signupGet = async (req, res) => {
     // Retrieve successMessage and errorMessage from session and delete them afterwards
     const successMessage = req.session.successMessage;

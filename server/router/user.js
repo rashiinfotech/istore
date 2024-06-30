@@ -40,6 +40,7 @@ userRouter.get('/login', loginGet);
 userRouter.post('/login', loginPost);
 userRouter.get('/logout', logout);
 userRouter.post('/generateOTP', generateOtpPost);
+userRouter.get('/resetpassword',  resetpassword);
 
 
 // Main routes
@@ -81,7 +82,7 @@ userRouter.post('/validate-coupon', isAuthenticated, validateCoupon);
 userRouter.get('/profile', isAuthenticatedGuest, profile);
 userRouter.get('/edit-profile', isAuthenticated, EditProfile);
 userRouter.post('/update-profile', validateProfileUpdate, UpdateProfile);
-userRouter.get('/resetpassword', isAuthenticated, resetpassword);
+
 userRouter.get('/wallet', isAuthenticated, wallet);
 userRouter.get('/coupons', isAuthenticated, coupons);
 

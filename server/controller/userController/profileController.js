@@ -455,13 +455,13 @@ const resetpassword= async (req, res) => {
         const categories = await Category.find();
         const address = await Address.find();
 
-        if (!user) {
-            // If user not found, handle it appropriately (e.g., redirect to login page)
-            return res.redirect('/login');
-        }
+        // if (!user) {
+        //     // If user not found, handle it appropriately (e.g., redirect to login page)
+        //     return res.redirect('/login');
+        // }
 
         // Render the edit-profile template with the user's data and isAuthenticated variable
-        res.render('user/Reset-password', { user, isAuthenticated: req.isAuthenticated,categories,address  });
+        res.render('user/Reset-password', );
     } catch (error) {
         console.error('Error fetching user profile:', error);
         // Handle errors (e.g., render an error page)
