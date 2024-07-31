@@ -41,6 +41,8 @@ app.use(session({
     saveUninitialized: true
 }));
 
+
+
 // Set up Passport
 require('./middelware/passport')(passport);
 app.use(passport.initialize());
@@ -51,14 +53,18 @@ app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
 // MongoDB connection 
-mongoose.connect(process.env.MONGODB_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true
-}).then(() => {
-    console.log("Connected to MongoDB");
-}).catch((error) => {
-    console.log("Error connecting to MongoDB:", error);
-});
+
+
+
+
+mongoose.connect(process.env.MONGODB_URI)
+    .then(() => {
+        console.log("Connected to MongoDB");
+    })
+    .catch((error) => {
+        console.error("Error connecting to MongoDB:", error);
+    });
+
 
 // Multer configuration
 const storage = multer.diskStorage({
