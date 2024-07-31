@@ -28,7 +28,7 @@ module.exports = function(passport) {
         clientID: process.env.GOOGLE_CLIENT_ID,
         clientSecret: process.env.GOOGLE_CLIENT_SECRET,
         // callbackURL: "http://localhost:8000/auth/google/callback"
-        callbackURL: "https://rashi.istore.solutions/auth/google/callback"
+        callbackURL: "https://rashi.i-store.solutions/auth/google/callback"
     },
     async function(token, tokenSecret, profile, done) {
         try {
