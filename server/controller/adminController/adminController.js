@@ -15,27 +15,107 @@ const couponModel =require('../../model/couponModel');
 
 // Admin management route controller function
 const adminmgmtGet = async (req, res) => {
-  //  console.log("inside admingmtGet")
-    try {
-      // Retrieve the list of users
-      const users = await userModel.find();
-     
-      // Check if the user is authenticated, exists, and has admin privileges
-  if (req.session.user && req.session.user.isAdmin) {
-   //  console.log(users + "   hii >>>>>>>>>>>>>>>>>>>>");
-    // res.render("admin/dashboard")
-     res.render("admin/dashboard", { user: req.session.user, users });
-     // res.json({ message: 'Login successful'});
-     //res.send("keee")
-  } else {
-    res.render('admin/adminLogin');
-  }
-  
-    } catch (error) {
-      console.error("Error fetching users:", error);
-      res.status(500).send("Internal Server Error");
+  try {
+    if (req.session.user && req.session.user.isAdmin) {
+      const activeItems = await Product.countDocuments({ status: true });
+
+      const itemsSoldResult = await Order.aggregate([
+        { $unwind: '$items' },
+        { $group: { _id: null, total: { $sum: '$items.quantity' } } }
+      ]);
+      const itemsSold = itemsSoldResult[0] ? itemsSoldResult[0].total : 0;
+
+      const totalUsers = await User.countDocuments();
+      const cancelledOrders = await Order.countDocuments({ status: 'Cancelled' });
+
+      const totalIncomeResult = await Order.aggregate([
+        { $group: { _id: null, total: { $sum: '$amount' } } }
+      ]);
+      const totalIncome = totalIncomeResult[0] ? totalIncomeResult[0].total.toFixed(2) : '0.00';
+
+      // Calculate current month's start and end dates
+      const now = new Date();
+      const currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+      const currentMonthEnd = now; // current date, end of the current month
+
+      console.log('currentMonthStart:', currentMonthStart);
+      console.log('currentMonthEnd:', currentMonthEnd);
+
+      // Calculate monthly income for the current month
+      let monthlyIncome = '0.00'; // Default value
+
+      try {
+        const monthlyIncomeResult = await Order.aggregate([
+          { $match: { createdAt: { $gte: currentMonthStart, $lte: currentMonthEnd } } },
+          { $group: { _id: null, total: { $sum: '$amount' } } }
+        ]);
+
+        if (monthlyIncomeResult.length > 0) {
+          monthlyIncome = monthlyIncomeResult[0].total.toFixed(2);
+        } else {
+          console.log('No orders found for the current month.');
+        }
+
+        console.log('Monthly Income:', monthlyIncome);
+      } catch (error) {
+        console.error('Error fetching monthly income:', error);
+        res.status(500).send('Server Error');
+        return; // Ensure to return or handle errors properly
+      }
+
+      const stats = {
+        activeItems,
+        itemsSold,
+        monthlyIncome,
+        totalUsers,
+        cancelledOrders,
+        totalIncome
+      };
+
+      const bestSellingProducts = await Order.aggregate([
+        { $unwind: "$items" },
+        { $group: { _id: "$items.productId", totalSold: { $sum: "$items.quantity" } } },
+        { $sort: { totalSold: -1 } },
+        { $limit: 10 },
+        { $lookup: { from: 'productdetails', localField: '_id', foreignField: '_id', as: 'product' } },
+        { $unwind: "$product" }
+      ]);
+
+      console.log('Best Selling Products:', bestSellingProducts);
+
+      const bestSellingCategories = await Order.aggregate([
+        { $unwind: "$items" },
+        { $lookup: { from: 'productdetails', localField: 'items.productId', foreignField: '_id', as: 'product' } },
+        { $unwind: "$product" },
+        { $group: { _id: "$product.category", totalSold: { $sum: "$items.quantity" } } },
+        { $sort: { totalSold: -1 } },
+        { $limit: 10 },
+        { $lookup: { from: 'categories', localField: '_id', foreignField: '_id', as: 'category' } },
+        { $unwind: "$category" },
+        { $project: { _id: "$category.name", totalSold: 1 } }
+      ]);
+
+      console.log('Best Selling Categories:', bestSellingCategories);
+
+      console.log('Stats:', stats);
+      console.log('Best Selling Products:', bestSellingProducts);
+      console.log('Best Selling Categories:', bestSellingCategories);
+
+      res.render('admin/dashboard', { stats, bestSellingProducts, bestSellingCategories, user: req.session.user });
+    } else {
+      res.render('admin/adminLogin');
     }
-  };
+  } catch (error) {
+    console.error('Error fetching dashboard data:', error);
+    res.status(500).send('Server Error');
+  }
+};
+
+
+
+
+
+
   
   const logoutAdmin = (req, res) => {
     // Destroy the admin session
@@ -544,11 +624,63 @@ const updateCoupon = async (req, res) => {
   }
 };
 
+const salesOverview = async (req, res) => {
+  try {
+    const { startDate, endDate, status, page = 1 } = req.query;
+    const limit = 10;
+    const skip = (page - 1) * limit;
+    let filter = {};
+
+    if (startDate && endDate) {
+      filter.createdAt = {
+        $gte: new Date(startDate),
+        $lte: new Date(endDate)
+      };
+    }
+
+    if (status) {
+      filter.status = status;
+    }
+
+    const orders = await Order.find(filter)
+                              .sort({ createdAt: -1 })
+                              .skip(skip)
+                              .limit(limit);
+    
+    const totalOrders = await Order.countDocuments(filter);
+    const totalPages = Math.ceil(totalOrders / limit);
+
+    // Calculate overall sales count, order amount, and discount
+    // Example calculations (replace with your actual logic)
+    const overallSalesCount = totalOrders;
+    const overallOrderAmount = orders.reduce((total, order) => total + order.amount, 0);
+    const overallDiscount = orders.reduce((total, order) => total + order.discount, 0);
+
+    if (req.session.user && req.session.user.isAdmin) {
+      res.render("admin/salesOverview", {
+        user: req.session.user,
+        orders,
+        currentPage: Number(page),
+        totalPages,
+        startDate,
+        endDate,
+        status,
+        overallSalesCount,
+        overallOrderAmount,
+        overallDiscount
+      });
+    } else {
+      res.render('admin/adminLogin');
+    }
+  } catch (error) {
+    console.error("Error fetching orders:", error); // Log detailed error message
+    res.status(500).send("Internal Server Error");
+  }
+};
 
 
 
 
 module.exports = { adminmgmtGet, adminLogin ,adminLoginPost,logoutAdmin,userManagment, addItem,blockUser,unblockUser,addUser,
   postAddUser,userOrders,viewOrder,updateOrderStatus,coupons,addCoupons,addCouponsPage,deleteCoupon,
-  editCouponpage,updateCoupon,
-  stock}
+  editCouponpage,updateCoupon,salesOverview,stock}

@@ -215,6 +215,10 @@ const updateProduct= async (req, res) => {
             req.session.errorMessage = 'Name, category, and price are required';
             return res.redirect(`/admin/item-editor/${productId}?errorMessage=Name, category, and price are required`);
         }
+        else if (price<0) {
+            req.session.errorMessage = 'Price is Negative';
+            return res.redirect(`/admin/item-editor/${productId}?errorMessage=Price is Negative`);
+        }
 
 
         try {

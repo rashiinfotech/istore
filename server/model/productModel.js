@@ -1,6 +1,5 @@
 const mongoose = require('mongoose');
 
-
 const productSchema = new mongoose.Schema({
     name: {
         type: String,
@@ -36,8 +35,3 @@ const productSchema = new mongoose.Schema({
 const productModel = mongoose.model('productDetails', productSchema);
 
 module.exports = productModel;
-
-
-// const Product = mongoose.model('Product', productSchema); // Change the model name to 'Product'
-
-// module.exports = Product;

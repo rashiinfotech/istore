@@ -15,7 +15,12 @@ const {
 } = require('../controller/userController/profileController');
 
 const { generateOtpPost } = require('../controller/userController/otpController');
-const { orders,validateCoupon ,razorpayKey,} = require('../controller/userController/checkoutController');
+const { orders,validateCoupon ,
+    razorpayKey,
+    // webhookHandler,
+    createFailedOrder,
+    capturePaymentAfterFailure
+} = require('../controller/userController/checkoutController');
 
 const { isAuthenticated, validateSignup, validateProfileUpdate,
     isAuthenticatedGuest
@@ -58,15 +63,19 @@ userRouter.get('/product/:id', isAuthenticatedGuest, getProduct);
 userRouter.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
 userRouter.get('/auth/google/callback' , passport.authenticate('google', { failureRedirect: '/login' }),isAuthenticatedGuest, googleAuth);
 userRouter.get('/cart', isAuthenticated, cart);
-userRouter.post('/cart/add/:productId', isAuthenticated, addItemToCart);
+userRouter.post('/cart/add/:productId', addItemToCart);
 userRouter.post('/removeFromCart/:userId/delete/:productId', isAuthenticated, deletItemToCart);
 userRouter.post('/updateCartQuantity/',isAuthenticated, updateCartQuantity);
 
 userRouter.post('/createOrder/:userId', isAuthenticated, createOrder);
-
+userRouter.post('/createFailedOrder/:userId', isAuthenticated, createFailedOrder);
 userRouter.post('/onlinepayment/:userId', isAuthenticated, onlinePayment);
 userRouter.post('/capturePaymentAndCreateOrder', isAuthenticated, capturePaymentAndCreateOrder);
+userRouter.post('/capturePaymentAfterFailure', isAuthenticated, capturePaymentAfterFailure)
+
 userRouter.post('/razorpay-key', isAuthenticated, razorpayKey);
+// userRouter.post('/webhook/razorpay', webhookHandler);
+
 
 userRouter.get('/orders/', isAuthenticated, orders);
 userRouter.get('/order-details/:orderId', isAuthenticated,viewOrder);
@@ -99,7 +108,7 @@ userRouter.post('/get-address', getAddress);
 
 // Wishlist routes
 userRouter.get('/wishlist', isAuthenticated, wishlist);
-userRouter.post('/wishlist/add/:userId', isAuthenticated, addToWishlist);
+userRouter.post('/wishlist/add/:userId',  addToWishlist);
 userRouter.post('/wishlist/:userId/delete/:itemId', isAuthenticated, wishlistDelete);
 
 userRouter.get('/generate-bill/:orderId',isAuthenticated,generateBill)

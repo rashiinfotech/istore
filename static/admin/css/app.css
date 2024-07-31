@@ -182,7 +182,7 @@ th, td {
 }
 
 th {
-    background-color: #2ecc71;
+    background-color: #85CE36 ;
     color: #fff;
 }
 
@@ -1828,7 +1828,7 @@ span a {
   left: 240px;
   right: 0;
   bottom: 0;
-  height: 50px;
+  height: 0px;
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;

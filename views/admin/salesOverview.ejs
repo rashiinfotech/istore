@@ -1,0 +1,219 @@
+<%- include("adminHead.ejs") %>
+
+<title>Sales Overview</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+    }
+    .containerBody {
+        margin-top: 10px;
+        margin-left: 10px;
+        padding: 20px;
+        max-width: 1200px;
+        background-color: #fff;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        border-radius: 5px;
+    }
+    h1 {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+    form {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+    }
+    label, input, select, button {
+        margin: 0 10px;
+    }
+    .quick-filters {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 20px;
+    }
+    .quick-filters button {
+        margin: 0 10px;
+        padding: 10px 20px;
+        border: 1px solid #ddd;
+        background-color: #f2f2f2;
+        cursor: pointer;
+    }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    th, td {
+        padding: 10px;
+        text-align: left;
+        border-bottom: 1px solid #ddd;
+    }
+    .pagination {
+        display: flex;
+        justify-content: center;
+        margin-top: 20px;
+    }
+    .pagination a {
+        margin: 0 5px;
+        padding: 10px;
+        border: 1px solid #ddd;
+        text-decoration: none;
+        color: #333;
+    }
+    .pagination a.active {
+        background-color: #007bff;
+        color: white;
+        border: 1px solid #007bff;
+    }
+    .export-button {
+        position: relative;
+        display: inline-block;
+    }
+    .export-button button {
+        margin: 0 10px;
+        padding: 10px 20px;
+        border: 1px solid #ddd;
+        background-color: #007bff;
+        color: white;
+        cursor: pointer;
+        border-radius: 5px;
+    }
+    .export-options {
+        display: none;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        z-index: 1;
+        background-color: #f2f2f2;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        border-radius: 5px;
+        overflow: hidden;
+    }
+    .export-options a {
+        display: block;
+        padding: 10px 20px;
+        text-decoration: none;
+        color: #333;
+        background-color: #fff;
+        border-bottom: 1px solid #ddd;
+    }
+    .export-options a:hover {
+        background-color: #ddd;
+    }
+</style>
+</head>
+<body>
+<div class="containerBody">
+    <h1>Sales Overview</h1>
+    <form method="GET" action="/sales-overview">
+        <label for="startDate">Start Date:</label>
+        <input type="date" id="startDate" name="startDate" value="<%= startDate %>">
+        <label for="endDate">End Date:</label>
+        <input type="date" id="endDate" name="endDate" value="<%= endDate %>">
+        <label for="status">Status:</label>
+        <select id="status" name="status">
+            <option value="">All</option>
+            <option value="Pending" <%= status === 'Pending' ? 'selected' : '' %>>Pending</option>
+            <option value="Completed" <%= status === 'Completed' ? 'selected' : '' %>>Completed</option>
+            <option value="Cancelled" <%= status === 'Cancelled' ? 'selected' : '' %>>Cancelled</option>
+        </select>
+        <button type="submit">Filter</button>
+    </form>
+    
+    <div class="quick-filters">
+        <button onclick="setQuickFilter('1day')">Last 1 Day</button>
+        <button onclick="setQuickFilter('1week')">Last 1 Week</button>
+        <button onclick="setQuickFilter('1month')">Last 1 Month</button>
+    </div>
+    <div class="export-button">
+        <button id="exportBtn">Export Data</button>
+        <div class="export-options" id="exportOptions">
+            <a href="#" onclick="exportData('pdf')"> PDF</a><br>
+            <a href="#" onclick="exportData('excel')">Excel</a>
+        </div>
+    </div>
+
+    <div class="overall-summary">
+        <h2>Overall Summary</h2>
+        <p>Total Sales Count: <%= overallSalesCount %></p>
+        <p>Total Order Amount: <%= overallOrderAmount %></p>
+        <p>Total Discount: <%= overallDiscount %></p>
+    </div>
+    
+
+
+    <table>
+        <thead>
+            <tr>
+                <th>Order ID</th>
+                <th>User</th>
+                <th>Amount</th>
+                <th>Discount</th>
+                <th>Coupon</th>
+                <th>Created At</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% orders.forEach(order => { %>
+                <tr>
+                    <td><%= order.orderId %></td>
+                    <td><%= order.userId.username %></td>
+                    <td><%= order.amount %></td>
+                    <td><%= order.discount %></td>
+                    <td><%= order.coupon %></td>
+                    <td><%= order.createdAt.toDateString() %></td>
+                    <td><%= order.status %></td>
+                </tr>
+            <% }) %>
+        </tbody>
+    </table>
+    <div class="pagination">
+        <% if (currentPage > 1) { %>
+            <a href="?page=<%= currentPage - 1 %>&startDate=<%= startDate %>&endDate=<%= endDate %>&status=<%= status %>">Previous</a>
+        <% } %>
+        <% for (let i = 1; i <= totalPages; i++) { %>
+            <a href="?page=<%= i %>&startDate=<%= startDate %>&endDate=<%= endDate %>&status=<%= status %>" class="<%= currentPage === i ? 'active' : '' %>"><%= i %></a>
+        <% } %>
+        <% if (currentPage < totalPages) { %>
+            <a href="?page=<%= currentPage + 1 %>&startDate=<%= startDate %>&endDate=<%= endDate %>&status=<%= status %>">Next</a>
+        <% } %>
+    </div>
+</div>
+<script>
+    function setQuickFilter(range) {
+        const now = new Date();
+        let startDate = new Date();
+        switch(range) {
+            case '1day':
+                startDate.setDate(now.getDate() - 1);
+                break;
+            case '1week':
+                startDate.setDate(now.getDate() - 7);
+                break;
+            case '1month':
+                startDate.setMonth(now.getMonth() - 1);
+                break;
+        }
+        document.getElementById('startDate').value = startDate.toISOString().split('T')[0];
+        document.getElementById('endDate').value = now.toISOString().split('T')[0];
+    }
+
+    document.getElementById('exportBtn').addEventListener('click', () => {
+        const exportOptions = document.getElementById('exportOptions');
+        exportOptions.style.display = exportOptions.style.display === 'flex' ? 'none' : 'flex';
+    });
+
+    function exportData(format) {
+        const startDate = document.getElementById('startDate').value;
+        const endDate = document.getElementById('endDate').value;
+        const status = document.getElementById('status').value;
+        let url = `/admin/export-sales-${format}?startDate=${startDate}&endDate=${endDate}&status=${status}`;
+        window.location.href = url;
+    }
+</script>
+<%- include("adminFooter.ejs") %>
+</body>
+</html>

@@ -100,21 +100,7 @@ const createOrder = async (req, res) => {
         res.status(500).json({ error: 'Internal server error', success: false });
     }
 };
-const onlinePayment = async (req, res) => {
-    console.log("hott onlinePayment ");
-    const { amount } = req.body;
-    const options = {
-        amount: amount * 100,
-        currency: 'INR',
-        receipt: `order_rcptid_${Date.now()}`,
-    };
-    razorpayInstance.orders.create(options, (err, order) => {
-        if (err) {
-            return res.status(500).json({ error: 'Error creating Razorpay order' });
-        }
-        res.json({ orderId: order.id });
-    });
-};
+
 
 const capturePaymentAndCreateOrder = async (req, res) => {
     console.log("Hit capturePaymentAndCreateOrder");
@@ -181,6 +167,72 @@ const capturePaymentAndCreateOrder = async (req, res) => {
         console.error('Error in capturePaymentAndCreateOrder:', error);
         res.status(500).json({ error: 'Internal server error', success: false });
     }
+};
+
+
+
+const onlinePayment = async (req, res) => {
+    console.log("hit onlinePayment");
+    const { amount, items, quantities, paymentOption, billAddress, shipAddress } = req.body;
+    const userId = req.session.userId;
+
+    if (!userId) {
+        return res.status(400).json({ error: 'Invalid user ID', success: false });
+    }
+
+    if (!items || items.length === 0 || !amount || amount <= 0) {
+        return res.status(400).json({ error: 'Invalid order details', success: false });
+    }
+
+    if (paymentOption === 'Cash on Delivery' && amount <= 2000) {
+        return res.status(400).json({ error: 'COD is only available for orders above ₹2000', success: false });
+    }
+
+    const orderItems = await Promise.all(items.map(async (productId, index) => {
+        const product = await Product.findById(productId);
+        const quantity = parseInt(quantities[index], 10);
+
+        if (!product || product.stock < quantity) {
+            throw new Error(`Insufficient stock for product ID ${productId}`);
+        }
+
+        return {
+            productId: product._id,
+            quantity: quantity,
+            price: product.price,
+        };
+    }));
+
+    const newOrder = new Order({
+        userId,
+        items: orderItems,
+        amount,
+        billAddress,
+        shipAddress,
+        payment: paymentOption,
+        status: 'pending',
+        paymentStatus: 'Pending',
+        createdAt: new Date(),
+        updated: new Date(),
+    });
+
+    const savedOrder = await newOrder.save();
+
+    const options = {
+        amount: amount * 100,
+        currency: 'INR',
+        receipt: savedOrder.orderId,
+        notes: {
+            order_id: savedOrder.orderId,
+        }
+    };
+
+    razorpayInstance.orders.create(options, (err, order) => {
+        if (err) {
+            return res.status(500).json({ error: 'Error creating Razorpay order' });
+        }
+        res.json({ razorpayOrderId: order.id, orderId: savedOrder.orderId });
+    });
 };
 
 
@@ -370,14 +422,13 @@ const checkout = async (req, res) => {
 
 const addItemToCart = async (req, res) => {
     try {
-        console.log("rech addcart",req.body,req.params);
-                const userId = req.session.userId;
+        const userId = req.session.userId;
         const { productId } = req.params;
         const { quantity } = req.body;
-       
+
         // Check if user is authenticated
         if (!userId) {
-            return res.status(401).json({ success: false, message: 'User not authenticated' });
+            return res.status(401).json({ success: false, message: 'User not logged in' });
         }
 
         // Validate quantity
@@ -437,40 +488,6 @@ const deletItemToCart = async (req, res) => {
 };
 
 
-// const thankYou = async (req, res) => {
-//     try {
-//         const orderId = req.params.orderId;
-//         const userId = req.session.userId;
-
-//         console.log('Received orderId:', orderId); // Log orderId to check its value
-
-//         const order = await Order.findOne({ orderId: orderId });
-//         console.log('Found order:', order); // Log order to check if it exists
-//  console.log(order);
-//         if (!order) {
-//             return res.status(404).json({ error: 'Order not found' });
-//         }
-
-//         console.log('User ID from session:', userId); // Log userId to check its value
-
-//         const user = await User.findById(userId);
-//         console.log('Found user:', user); // Log user to check if it exists
-
-//         const categories = await Category.find();
-        
-//         res.render('user/thank-you', { 
-//             orderId: orderId, 
-//             amount: order.amount, 
-//             paymentOption: order.payment,
-//             isAuthenticated: req.isAuthenticated,
-//             user,
-//             categories 
-//         });
-//     } catch (error) {
-//         console.error('Error rendering thank-you page:', error);
-//         res.status(500).json({ error: 'Internal server error' });
-//     }
-// };
 const thankYou = async (req, res) => {
     try {
         const orderId = req.params.orderId;
@@ -527,9 +544,20 @@ const viewOrder = async (req, res) => {
 
         const categories = await Category.find();
         const products = await Product.find({ _id: { $in: order.items.map(item => item.productId) } });
-console.log(products);
+
+        // Ensure order.user is populated with necessary fields
+        const populatedOrder = {
+            ...order.toObject(),
+            user: {
+                email: user.email,
+                phone: user.phone
+            }
+        };
+console.log("user.phone", user.phone);
+console.log("user.email", user.email);
+console.log("user", user);
         res.render('user/orderDetails', { 
-            order,
+            order: populatedOrder,
             orderId: order.orderId, 
             amount: order.amount, 
             paymentOption: order.payment,
@@ -543,27 +571,35 @@ console.log(products);
         res.status(500).json({ error: 'Internal server error' });
     }
 };
+
+
+
+
 const cancelOrders = async (req, res) => {
     const orderId = req.params.orderId;
-
+    console.log("Cancel order request received for orderId:", orderId);
     try {
         // Find the order by orderId
         const order = await Order.findOne({ orderId });
+        console.log("Order found:", order);
 
         // If order not found
         if (!order) {
-            return res.status(404).json({ message: "Order not found" });
+            console.log("Order not found");
+            return res.status(404).json({ success: false, message: "Order not found" });
         }
 
         // If order is already cancelled, return a message
         if (order.status === "Cancelled") {
-            return res.status(400).json({ message: "Order is already cancelled" });
+            console.log("Order is already cancelled");
+            return res.status(400).json({ success: false, message: "Order is already cancelled" });
         }
 
         // Update the stock for each item in the order
         const items = order.items; // Assuming 'items' is an array of { productId, quantity }
         for (const item of items) {
             const product = await Product.findById(item.productId);
+            console.log("Product found for item:", item, "Product:", product);
 
             // If product not found, log an error (but continue processing)
             if (!product) {
@@ -574,19 +610,23 @@ const cancelOrders = async (req, res) => {
             // Update the stock quantity
             product.stock += item.quantity;
             await product.save();
+            console.log("Product stock updated for product:", product);
         }
 
         // Update the order status to "Cancelled"
         order.status = "Cancelled";
         await order.save();
+        console.log("Order status updated to 'Cancelled' for order:", order);
 
         // If the payment method is online, update the wallet balance
         if (order.payment === 'Online Payment') {
             let wallet = await Wallet.findOne({ userId: order.userId });
+            console.log("Wallet found for user:", wallet);
 
             // If no wallet exists for the user, create one
             if (!wallet) {
                 wallet = new Wallet({ userId: order.userId, balance: 0 });
+                console.log("New wallet created for user:", wallet);
             }
 
             // Update wallet balance
@@ -600,73 +640,19 @@ const cancelOrders = async (req, res) => {
             });
 
             await wallet.save();
+            console.log("Wallet updated with refund for order:", orderId);
         }
 
         // Respond with success message
-        return res.status(200).json({ message: "Order cancelled successfully" });
+        console.log("Order cancelled successfully");
+        return res.status(200).json({ success: true, message: "Order cancelled successfully" });
     } catch (error) {
         // If an error occurs, respond with error message
         console.error("Error cancelling order:", error);
-        return res.status(500).json({ message: "Internal server error" });
+        return res.status(500).json({ success: false, message: "Internal server error", error: error.message });
     }
 };
 
-//const cancelOrders = async (req, res) => {
-//     const orderId = req.params.orderId;
-
-//     try {
-//         // Find the order by orderId
-//         const order = await Order.findOne({ orderId });
-
-//         // If order not found
-//         if (!order) {
-//             return res.status(404).json({ message: "Order not found" });
-//         }
-
-//         // If order is already cancelled, return a message
-//         if (order.status === "Cancelled") {
-//             return res.status(400).json({ message: "Order is already cancelled" });
-//         }
-
-//         // Update the stock for each item in the order
-//         const items = order.items; // Assuming 'items' is an array of { productId, quantity }
-//         for (const item of items) {
-//             // const product = await Product.findOne({ productId: item.productId });
-//             const product = await Product.findById(item.productId);
-
-//             // If product not found, log an error (but continue processing)
-//             if (!product) {
-//                 console.error(`Product with ID ${item.productId} not found`);
-//                 continue;
-//             }
-
-//             // Log the current stock and quantity to be added
-//             console.log(`Product ID: ${item.productId}, Current Stock: ${product.stock}, Quantity to Add: ${item.quantity}`);
-
-//             // Update the stock quantity
-//             product.stock += item.quantity;
-
-//             // Save the updated product
-//             await product.save();
-
-//             // Log the new stock quantity
-//             console.log(`New Stock for Product ID ${item.productId}: ${product.stock}`);
-//         }
-
-//         // Update the order status to "Cancelled"
-//         order.status = "Cancelled";
-
-//         // Save the updated order
-//         await order.save();
-
-//         // Respond with success message
-//         return res.status(200).json({ message: "Order cancelled successfully" });
-//     } catch (error) {
-//         // If an error occurs, respond with error message
-//         console.error("Error cancelling order:", error);
-//         return res.status(500).json({ message: "Internal server error" });
-//     }
-// };
 
 
 

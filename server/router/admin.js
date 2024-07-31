@@ -3,13 +3,14 @@ const { adminmgmtGet, adminLogin, adminLoginPost, logoutAdmin, userManagment, ad
     postAddUser,
     userOrders,coupons,addCoupons,addCouponsPage,deleteCoupon,editCouponpage,
     updateCoupon,
-    viewOrder, updateOrderStatus,
+    viewOrder, updateOrderStatus,salesOverview,
 stock } = require('../controller/adminController/adminController');
 const { catList , addCat, submitCat, blockCat, editCat, deleteCat,unblockCat ,updateCat} = require('../controller/adminController/categoryController');
 const { submitItems,
      getsubmitItems, itemsList,updateImage, itemEditor, updateProduct, deleteProduct, activateProduct ,deleteImage ,productImgEditor,
    
  } = require('../../server/controller/adminController/productController');
+ const{exportSalesToExcel,exportSalesToPDF}=require('../../server/controller/adminController/reports');
 const adminRouter = express.Router();
 const multer = require('multer');
 const upload = multer({ dest: 'uploads/' });
@@ -27,7 +28,7 @@ const upload = multer({ dest: 'uploads/' });
   
 
 
-adminRouter.get('/', adminLogin);   
+adminRouter.get('/', adminmgmtGet);   
 adminRouter.post('/admin', adminLoginPost);
 adminRouter.get('/dashboard', adminmgmtGet); 
 adminRouter.get('/adminLogout', logoutAdmin); 
@@ -79,5 +80,9 @@ adminRouter.get('/edit-coupon/:couponId',editCouponpage)
 adminRouter.post('/update-coupon/:couponId',updateCoupon)
 
 
+
+adminRouter.get('/sales-overview', salesOverview)
+adminRouter.get('/export-sales-pdf', exportSalesToPDF);
+adminRouter.get('/export-sales-excel', exportSalesToExcel);
 
 module.exports = adminRouter;

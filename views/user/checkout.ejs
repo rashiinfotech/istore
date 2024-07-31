@@ -565,137 +565,241 @@ function confirmDelete(productId, itemId) {
                 }
             });
         }
-    
-    $(document).ready(function() {
- 
-        function initRazorpayPayment(grandTotal, orderData) {
-        var razorpayOptions = {
-            key: 'rzp_test_auDl0LryuSRaVK',
-            amount: grandTotal * 100, // Amount should be in paisa
-            currency: 'INR',
-            name: 'istore',
-            description: 'your Perfect gadget partner',
-            image: '',
-            handler: function(response) {
-                // Send the payment ID and other details to your server
-                $.ajax({
-                    url: '/capturePaymentAndCreateOrder',
-                    method: 'POST',
-                    dataType: 'json',
-                    data: {
-                        payment_id: response.razorpay_payment_id,
-                        amount: grandTotal,
-                        currency: 'INR',
-                        ...orderData
-                    },
-                    success: function(data) {
-                        console.log('Payment and order success: ', data);
-                        if (data.success) {
-                            Swal.fire({
-                                icon: 'success',
-                                title: 'Order Placed Successfully',
-                                text: `Your order ID is ${data.orderId}. Thank you for shopping with us!`,
-                                showConfirmButton: true,
-                                allowOutsideClick: false
-                            }).then(() => {
-                                window.location.href = `/thank-you/${data.orderId}`; // Redirect to thank-you page
-                            });
-                        } else {
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'Order Placement Failed',
-                                text: data.error || 'An error occurred while placing the order.'
-                            });
-                        }
-                    },
-                    error: function(error) {
-                        console.error('Payment and order error: ', error);
+       
+       
+       
+       
+        $(document).ready(function() {
+            function initRazorpayPayment(grandTotal, orderData) {
+    var razorpayOptions = {
+        key: 'rzp_test_auDl0LryuSRaVK',
+        amount: grandTotal * 100, // Amount should be in paisa
+        currency: 'INR',
+        name: 'istore',
+        description: 'Your Perfect Gadget Partner',
+        image: '',
+        handler: function(response) {
+            $.ajax({
+                url: '/capturePaymentAndCreateOrder',
+                method: 'POST',
+                dataType: 'json',
+                data: {
+                    payment_id: response.razorpay_payment_id,
+                    amount: grandTotal,
+                    currency: 'INR',
+                    paymentOption: orderData.paymentOption,
+                    ...orderData
+                },
+                success: function(data) {
+                    if (data.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Order Placed Successfully',
+                            text: `Your order ID is ${data.orderId}. Thank you for shopping with us!`,
+                            showConfirmButton: true,
+                            allowOutsideClick: false
+                        }).then(() => {
+                            window.location.href = `/thank-you/${data.orderId}`;
+                        });
+                    } else if (data.error === 'Payment capture failed') {
+                        handlePaymentFailure(data.orderId, grandTotal, orderData);
+                    } else {
                         Swal.fire({
                             icon: 'error',
-                            title: 'Order Placement Failed',
-                            text: 'There was an issue with your payment. Please try again.'
+                            title: 'Order Failed',
+                            text: 'There was an issue placing your order. Please try again.'
                         });
                     }
-                });
-            },
-            prefill: {
-                name: 'Customer Name',
-                email: 'customer@example.com',
-                contact: 'Customer Phone Number'
-            },
-            notes: {}
-        };
-
-        var rzp = new Razorpay(razorpayOptions);
-        rzp.open();
-    }
- 
-    $('#placeOrderBtn').click(function(event) {
-        event.preventDefault();
-        const formData = new FormData($('#orderForm')[0]);
-        const selectedShippingAddress = JSON.parse(localStorage.getItem('selectedShippingAddress'));
-        const selectedBillingAddress = JSON.parse(localStorage.getItem('selectedBillingAddress'));
-        var paymentOption = $('input[name="payment"]:checked').val();
-        var consentChecked = $('#term-and-condition').is(':checked');
-
-        const orderData = {
-            paymentOption: formData.get('payment'),
-            billAddress: selectedBillingAddress,
-            shipAddress: selectedShippingAddress,
-            amount: formData.get('amount'),
-            items: formData.getAll('items[]'),
-            quantities: formData.getAll('quantities[]')
-        };
-
-        if (paymentOption === 'Online Payment' && consentChecked) {
-            // Trigger Razorpay payment process
-            initRazorpayPayment(parseFloat(orderData.amount), orderData);
-        } else if (paymentOption === 'Cash on Delivery' && consentChecked) {
-            // Submit the form directly
-            fetch(`/createOrder/<%= userId %>`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
                 },
-                body: JSON.stringify(orderData)
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
+                error: function(xhr, status, error) {
                     Swal.fire({
-                        icon: 'success',
-                        title: 'Order Placed Successfully',
-                        text: `Your order ID is ${data.orderId}. Thank you for shopping with us!`,
-                        showConfirmButton: true,
-                        allowOutsideClick: false
-                    }).then(() => {
-                        window.location.href = `/thank-you/${data.orderId}`; // Redirect to thank-you page
+                        icon: 'error',
+                        title: 'Payment Failed',
+                        text: 'There was an issue with your payment. Please try again.'
                     });
-                } else {
+                }
+            });
+        },
+        prefill: {
+            name: '',
+            email: '',
+            contact: ''
+        },
+        notes: {
+            address: 'iStore Corporate Office'
+        },
+        theme: {
+            color: '#F37254'
+        },
+        retry: {
+            enabled: false, // Disable retry
+            max_count: 0 // Set maximum retry count to 0
+        },
+        modal: {
+            ondismiss: function() {
+                handlePaymentFailure(orderData.orderId, grandTotal, orderData);
+            }
+        }
+    };
+
+    var razorpayInstance = new Razorpay(razorpayOptions);
+    razorpayInstance.open();
+}
+
+function handlePaymentFailure(orderId, grandTotal, orderData) {
+    Swal.fire({
+        title: "Payment Failed",
+        text: "Do you want to place the order again?",
+        icon: "error",
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, place the order'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // Retry the payment with the existing order data
+            $.ajax({
+                url: `/createFailedOrder/${orderData.userId}`,
+                method: 'POST',
+                dataType: 'json',
+                contentType: 'application/json',
+                data: JSON.stringify(orderData),
+                success: function(data) {
+                    if (data.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Order Placed Successfully',
+                            text: `Your order ID is ${data.orderId}. Thank you for shopping with us!`,
+                            showConfirmButton: true,
+                            allowOutsideClick: false
+                        }).then(() => {
+                            window.location.href = `/thank-you/${data.orderId}`;
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Order Failed',
+                            text: 'There was an issue placing your order. Please try again.'
+                        });
+                    }
+                },
+                error: function(xhr, status, error) {
                     Swal.fire({
                         icon: 'error',
                         title: 'Order Placement Failed',
-                        text: data.error || 'An error occurred while placing the order.'
+                        text: 'An unexpected error occurred. Please try again later.'
                     });
                 }
-            })
-            .catch(error => {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Order Placement Failed',
-                    text: 'An unexpected error occurred. Please try again later.'
-                });
             });
         } else {
-            Swal.fire({
-                icon: 'warning',
-                title: 'Incomplete Form',
-                text: 'Please select a payment option and accept the terms and conditions.'
+            // If user chooses not to retry, mark the order as failed
+            $.ajax({
+                url: `/createFailedOrder/${orderData.userId}`,
+                method: 'POST',
+                dataType: 'json',
+                contentType: 'application/json',
+                data: JSON.stringify(orderData),
+                success: function(data) {
+                    if (data.success) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Order Failed',
+                            text: 'Your order could not be placed. Please contact support for assistance.'
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Failed to Create Order',
+                            text: 'There was an issue creating the failed order. Please try again.'
+                        });
+                    }
+                },
+                error: function(xhr, status, error) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Failed to Create Order',
+                        text: 'An unexpected error occurred. Please try again later.'
+                    });
+                }
             });
         }
     });
+}
+
+
+$('#placeOrderBtn').click(function(event) {
+    event.preventDefault();
+    const formData = new FormData($('#orderForm')[0]);
+    const selectedShippingAddress = JSON.parse(localStorage.getItem('selectedShippingAddress'));
+    const selectedBillingAddress = JSON.parse(localStorage.getItem('selectedBillingAddress'));
+    var paymentOption = $('input[name="payment"]:checked').val();
+    var consentChecked = $('#term-and-condition').is(':checked');
+    var userId = '<%= userId %>'; // Ensure this is dynamically set from your server-side template
+
+    const billAddress = selectedBillingAddress ? selectedBillingAddress.address : '';
+    const shipAddress = selectedShippingAddress ? selectedShippingAddress.address : '';
+
+    const orderData = {
+        userId: userId,
+        paymentOption: paymentOption,
+        billAddress: billAddress,
+        shipAddress: shipAddress,
+        amount: formData.get('amount'),
+        items: formData.getAll('items[]'),
+        quantities: formData.getAll('quantities[]')
+    };
+
+    if (paymentOption === 'Online Payment' && consentChecked) {
+        initRazorpayPayment(parseFloat(orderData.amount), orderData);
+    } else if (paymentOption === 'Cash on Delivery' && consentChecked) {
+        fetch(`/createOrder/${userId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(orderData)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Order Placed Successfully',
+                    text: `Your order ID is ${data.orderId}. Thank you for shopping with us!`,
+                    showConfirmButton: true,
+                    allowOutsideClick: false
+                }).then(() => {
+                    window.location.href = `/thank-you/${data.orderId}`;
+                });
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Order Placement Failed',
+                    text: data.error || 'An error occurred while placing the order.'
+                });
+            }
+        })
+        .catch(error => {
+            Swal.fire({
+                icon: 'error',
+                title: 'Order Placement Failed',
+                text: 'An unexpected error occurred. Please try again later.'
+            });
+        });
+    } else {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Incomplete Form',
+            text: 'Please select a payment option and accept the terms and conditions.'
+        });
+    }
+});
+
+
+
+
             // Handle coupon application
-$('#coupon-form').submit(function(event) {
+            $('#coupon-form').submit(function(event) {
                 event.preventDefault();
                 const couponCode = $('#coupon').val();
                 const grandTotal = parseFloat($('#grandTotalAmount').text());
@@ -729,7 +833,7 @@ $('#coupon-form').submit(function(event) {
             });
     
             // Handle address change button click
- $('.change-address-btn').on('click', function() {
+            $('.change-address-btn').on('click', function() {
                 var addressType = $(this).data('address-type');
                 $('#address-modal').show();
                 $.ajax({
@@ -759,8 +863,8 @@ $('#coupon-form').submit(function(event) {
             });
     
             // Handle address selection in the modal
-$('#select-address-btn').on('click', function() {
-                var selectedAddress = $('input[name="address"]:checked').data('address');
+         $('#select-address-btn').on('click', function() {
+                 var selectedAddress = $('input[name="address"]:checked').data('address');
                 if (selectedAddress) {
                     var addressType = $('#address-modal').data('address-type');
                     var addressHtml = `
@@ -785,12 +889,9 @@ $('#select-address-btn').on('click', function() {
                     alert('Please select an address.');
                 }
             });
-    
-           
-});
+        });
     </script>
     
-
 
    
     

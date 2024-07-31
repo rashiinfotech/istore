@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const shortid = require('shortid');
 const Schema = mongoose.Schema;
-const User = require('./userModel'); 
+const User = require('./userModel');
 
 const orderSchema = new mongoose.Schema({
     userId: {
@@ -54,6 +54,10 @@ const orderSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    paymentStatus: {
+        type: String,
+        default: 'Success'
+    },
     createdAt: {
         type: Date,
         default: Date.now,
@@ -78,6 +82,3 @@ const orderSchema = new mongoose.Schema({
 const Order = mongoose.model("orders", orderSchema);
 
 module.exports = Order;
-
-
-

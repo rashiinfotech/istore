@@ -334,71 +334,92 @@
     const wishlistButton = document.querySelector('.wishlist-btn');
 
     if (addToCartButton && productQtyInput && qtyUpButton && qtyDownButton && wishlistButton) {
-        addToCartButton.addEventListener('click', (event) => {
-            const productId = addToCartButton.dataset.productId;
-            const qty = parseInt(productQtyInput.value, 10);
-            const maxQty = parseInt(productQtyInput.max, 10);
+    addToCartButton.addEventListener('click', (event) => {
+        const productId = addToCartButton.dataset.productId;
+        const qty = parseInt(productQtyInput.value, 10);
+        const maxQty = parseInt(productQtyInput.max, 10);
 
-            console.log(`Product ID: ${productId}, Quantity: ${qty}, Max Quantity: ${maxQty}`);
+        console.log(`Product ID: ${productId}, Quantity: ${qty}, Max Quantity: ${maxQty}`);
 
-            if (isNaN(qty) ) {
-                console.error('Invalid quantity input detected');
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Invalid quantity',
-                    text: `Please enter a quantity between 1 and ${maxQty}`,
-                });
-                return;
-            }
-			if ( 0 == maxQty ) {
-                console.error('Invalid quantity input detected');
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Out of Stock',
-                    text: `Please purachse another product`,
-                });
-                return;
-            }
-
-			if ( qty > maxQty) {
-                console.error('Invalid quantity input detected');
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Low stock',
-                    text: `Please enter a quantity between 1 and ${maxQty}`,
-                });
-                return;
-            }
-
-
-            fetch(`/cart/add/${productId}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({quantity: qty }),
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Added to cart',
-                        showConfirmButton: false,
-                        timer: 1500
-                    });
-                } else {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Oops...',
-                        text: data.message
-                    });
-                }
-            })
-            .catch((error) => {
-                console.error('Error:', error);
+        if (isNaN(qty)) {
+            console.error('Invalid quantity input detected');
+            Swal.fire({
+                icon: 'error',
+                title: 'Invalid quantity',
+                text: `Please enter a quantity between 1 and ${maxQty}`,
             });
+            return;
+        }
+        if (maxQty === 0) {
+            console.error('Product out of stock');
+            Swal.fire({
+                icon: 'error',
+                title: 'Out of Stock',
+                text: 'This product is currently out of stock. Please purchase another product.',
+            });
+            return;
+        }
+        if (qty > maxQty) {
+            console.error('Invalid quantity input detected');
+            Swal.fire({
+                icon: 'error',
+                title: 'Low stock',
+                text: `Please enter a quantity between 1 and ${maxQty}`,
+            });
+            return;
+        }
+
+        fetch(`/cart/add/${productId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ quantity: qty }),
+        })
+        .then(response => {
+            if (response.status === 401) {
+                // Show SweetAlert and redirect to login page
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Please Log In',
+                    text: 'You need to log in to add items to the cart.',
+                    confirmButtonText: 'Log In'
+                }).then(() => {
+                    window.location.href = '/login'; // Redirect to login page
+                });
+                throw new Error('User not logged in'); // Prevent further processing
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Added to cart',
+                    showConfirmButton: false,
+                    timer: 1500
+                });
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: data.message
+                });
+            }
+        })
+        .catch((error) => {
+            if (error.message !== 'User not logged in') {
+                console.error('Error:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Failed to add product to cart.'
+                });
+            }
         });
+    });
+
+
 
         qtyUpButton.addEventListener('click', () => {
             let currentQty = parseInt(productQtyInput.value, 10);

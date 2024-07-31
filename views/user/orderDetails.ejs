@@ -100,6 +100,7 @@
         color: #dc3545; /* Red color for cancelled */
     }
 </style>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
 <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
 <div class="order-details-container">
@@ -112,6 +113,7 @@
         <div class="order-status <%= order.status === 'Cancelled' ? 'status-cancelled' : 'status-pending' %>">
             Order Status: <%= order.status %>
         </div>
+        <div>Payment Status: <%= order.paymentStatus %></div>
         <div>Order Items:</div>
         <ul class="order-items-list">
             <% order.items.forEach(item => { %>
@@ -128,16 +130,100 @@
             <% }); %>
         </ul>
     </div>
+    <!-- name: '<%= user.username  %>',
+    email: '<%=user.email  %>',
+    contact: '<%= user.phone  %>'
+    orderId <%= amount   %>' -->
     <div class="button-container">
         <a href="/">Continue Shopping</a>
         <% if (order.status !== 'Cancelled') { %>
             <button onclick="confirmCancel()">Cancel Order</button>
         <% } %>
         <a href="/generate-bill/<%= order._id %>" target="_blank">View Bill</a>
+        <% if (order.paymentStatus === 'failed') { %>
+            <button id="payNowButton" data-amount="<%= order.amount %>" data-orderid="<%= order.orderId %>">Pay Now</button>
+        <% } %>
     </div>
 </div>
 
 <script>
+    // Function to handle payment initiation
+    function initRazorpayPayment(amount, orderId, userName) {
+        var options = {
+            key: 'rzp_test_auDl0LryuSRaVK', // Replace with your Razorpay key
+            amount: amount * 100, // Amount should be in paisa
+            currency: 'INR',
+            name: userName,
+            description: 'Your Perfect Gadget Partner',
+            image: '',
+            order_id: orderId, // Pass the order ID as a string
+            handler: function (response) {
+                // Payment handler logic
+                // Send AJAX request to capture payment and update order status
+                capturePayment(response.razorpay_payment_id);
+            },
+            prefill: {
+                name: '<%= user.username  %>',
+                email: '<%=user.email  %>',
+                contact: '<%= user.phone  %>'
+            },
+            notes: {
+                address: 'iStore Corporate Office'
+            },
+            theme: {
+                color: '#F37254'
+            }
+        };
+        var rzp = new Razorpay(options);
+        rzp.open();
+    }
+
+    // Function to handle payment capture
+    function capturePayment(paymentId) {
+        $.ajax({
+            url: '/capturePaymentAfterFailure',
+            method: 'POST',
+            dataType: 'json',
+            contentType: 'application/json',
+            data: JSON.stringify({ paymentId: paymentId }),
+            success: function(data) {
+                if (data.success) {
+                    swal({
+                        icon: 'success',
+                        title: 'Payment Successful',
+                        text: 'Your payment was successful. Thank you for your order!',
+                        showConfirmButton: true,
+                        allowOutsideClick: false
+                    }).then(() => {
+                        window.location.href = `/thank-you/${data.orderId}`;
+                    });
+                } else {
+                    swal({
+                        icon: 'error',
+                        title: 'Payment Failed',
+                        text: 'There was an issue processing your payment. Please try again.',
+                    });
+                }
+            },
+            error: function(xhr, status, error) {
+                swal({
+                    icon: 'error',
+                    title: 'Payment Failed',
+                    text: 'An unexpected error occurred. Please try again later.',
+                });
+            }
+        });
+    }
+
+    // Click event listener for Pay Now button
+    document.getElementById('payNowButton').addEventListener('click', function() {
+        var amount = this.getAttribute('data-amount');
+        var orderId = this.getAttribute('data-orderid');
+        var userName = '<%= order.user ? order.user.name : '' %>';
+        initRazorpayPayment(amount, orderId, userName);
+    });
+
+    // Function to confirm order cancellation
     function confirmCancel() {
         swal({
             title: "Are you sure?",
@@ -157,31 +243,28 @@
         });
     }
 
+    // Function to cancel order
     function cancelOrder() {
-    // Send a request to cancel the order
-    fetch(`/cancel-orders/<%= order._id %>`)
-    .then(response => {
-        if (response.ok) {
-            // Order successfully cancelled, show success message
-            swal("Order Cancelled!", {
-                icon: "success",
-            }).then(() => {
-                // Reload the page
-                window.location.reload();
-            });
-            // Optionally, redirect the user to a different page after cancellation
-            // window.location.href = "/cancelled";
-        } else {
-            // Order cancellation failed, show error message
+        fetch(`/cancel-orders/<%= orderId %>`)
+        .then(response => {
+            if (response.ok) {
+                swal("Order Cancelled!", {
+                    icon: "success",
+                }).then(() => {
+                    window.location.reload();
+                });
+            } else {
+                swal("Error", "Failed to cancel order", "error");
+            }
+        })
+        .catch(error => {
+            console.error("Error cancelling order:", error);
             swal("Error", "Failed to cancel order", "error");
-        }
-    })
-    .catch(error => {
-        // Handle any network or server errors
-        console.error("Error cancelling order:", error);
-        swal("Error", "Failed to cancel order", "error");
-    });
-}
+        });
+    }
 </script>
 
 <%- include("footer.ejs") %>
+
+
+
