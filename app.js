@@ -1,5 +1,4 @@
 require('dotenv').config(); // Load environment variables
-
 const express = require('express');
 const path = require('path');
 const mongoose = require('mongoose');
@@ -11,10 +10,9 @@ const adminRouter = require('./server/router/admin');
 const bodyParser = require('body-parser');
 const multer = require('multer');
 const passport = require('passport');
-const Razorpay = require('razorpay');
-
 const app = express();
 const PORT = process.env.PORT || 8000;
+const Razorpay = require('razorpay');
 
 // Serve static files from the 'static' directory
 app.use('/static', express.static(path.join(__dirname, 'static')));
@@ -44,7 +42,7 @@ app.use(session({
 }));
 
 // Set up Passport
-require('./middleware/passport')(passport); // Ensure this path is correct
+require('./middleware/passport')(passport);
 app.use(passport.initialize());
 app.use(passport.session());
 
@@ -86,7 +84,6 @@ const upload = multer({
     fileFilter: fileFilter
 });
 
-// Razorpay instance
 var instance = new Razorpay({
     key_id: process.env.RAZORPAY_KEY_ID,
     key_secret: process.env.RAZORPAY_KEY_SECRET,
