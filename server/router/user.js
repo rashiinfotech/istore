@@ -11,7 +11,7 @@ const {
 const { 
     resetpassword, wallet, address, coupons, profile, addAddress, UpdateProfile, 
     EditProfile, deleteAddress, setPrimaryAddress, getAddressById, updateAddress, 
-    wishlist, addToWishlist,wishlistDelete,getAddress
+    wishlist, addToWishlist,wishlistDelete,getAddress,requestresetpassword,resetingpassword
 } = require('../controller/userController/profileController');
 
 const { generateOtpPost } = require('../controller/userController/otpController');
@@ -46,8 +46,18 @@ userRouter.post('/login', loginPost);
 userRouter.get('/logout', logout);
 userRouter.post('/generateOTP', generateOtpPost);
 userRouter.get('/resetpassword',  resetpassword);
+// userRouter.post('/request-password-reset', requestresetpassword);
+userRouter.post('/resetingpassword',  resetingpassword)
 
-
+userRouter.post('/request-password-reset', async (req, res) => {
+    console.log("POST request received at /request-password-reset");
+    const { email } = req.body;
+    if (!email) {
+        return res.status(400).json({ message: "Email is required" });
+    }
+    // Further processing, e.g., generate and send OTP
+    res.status(200).json({ message: 'OTP sent to your email.' });
+});
 // Main routes
 userRouter.get('/', isAuthenticatedGuest, index); 
 userRouter.get('/store',isAuthenticatedGuest, store);

@@ -17,8 +17,33 @@ const shortid = require('shortid');
 const Coupon = require('../../model/couponModel');
 const Wishlist = require('../../model/wishlistModel'); 
 
+const crypto = require('crypto');
+
+function generateOTP() {
+    return crypto.randomInt(100000, 999999).toString(); // Generates a 6-digit OTP
+}
 
 
+const nodemailer = require('nodemailer');
+
+async function sendOTPEmail(email, otp) {
+    let transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+            user: 'your-email@gmail.com',
+            pass: 'your-email-password'
+        }
+    });
+
+    let mailOptions = {
+        from: 'your-email@gmail.com',
+        to: email,
+        subject: 'Your OTP Code',
+        text: `Your OTP code is ${otp}. It expires in 10 minutes.`
+    };
+
+    await transporter.sendMail(mailOptions);
+}
 
 
 const EditProfile= async (req, res) => {
@@ -468,6 +493,44 @@ const resetpassword= async (req, res) => {
         res.status(500).send('Internal Server Error');
     }
 };
+const requestresetpassword = async (req, res) => {
+    console.log("POST request received at /request-password-reset");
+    const { email } = req.body;
+
+    if (!email) {
+        return res.status(400).json({ message: "Email is required" });
+    }
+
+    const otp = generateOTP();
+    const expiresAt = Date.now() + 10 * 60 * 1000; // 10 minutes from now
+
+    // Store OTP and expiry in the database
+    await storeOTPInDatabase(email, otp, expiresAt);
+
+    // Send OTP via email
+    await sendOTPEmail(email, otp);
+
+    res.status(200).json({ message: 'OTP sent to your email.' });
+};
+
+
+
+
+const resetingpassword=async (req, res) => {
+    const { email, otp, newPassword } = req.body;
+
+    // Validate OTP
+    const valid = await validateOTP(email, otp);
+
+    if (valid) {
+        // Update password in the database
+        await updatePassword(email, newPassword);
+        res.status(200).send('Password reset successfully.');
+    } else {
+        res.status(400).send('Invalid or expired OTP.');
+    }
+};
+
 
 module.exports = getAddress;
 
@@ -488,5 +551,7 @@ module.exports = {
     wishlist,
     addToWishlist,
     wishlistDelete,
-    getAddress
+    getAddress,
+    requestresetpassword,
+    resetingpassword
 }
