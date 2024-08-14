@@ -480,7 +480,7 @@ const resetpassword= async (req, res) => {
         // }
 
         // Render the edit-profile template with the user's data and isAuthenticated variable
-        res.render('user/reset-password', );
+        res.render('user/Reset-Password', );
     } catch (error) {
         console.error('Error fetching user profile:', error);
         // Handle errors (e.g., render an error page)
