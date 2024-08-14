@@ -312,7 +312,7 @@ const cart = async (req, res) => {
         const subtotal = calculateSubtotal(totalBeforeTax, tax);
         const grandTotal = calculateGrandTotal(subtotal, shipping);
         
-        res.render('user/Cart', {
+        res.render('user/cart', {
             products: cartItems.map(item => ({
                 product: item.product,
                 quantity: item.quantity,
