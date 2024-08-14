@@ -256,7 +256,7 @@ function calculateTotal(cartItems) {
     }
     return total;
 }
-
+console.log("object");
 function calculateTax(total) {
     return total * 0.18;
 }
