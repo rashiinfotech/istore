@@ -3,9 +3,7 @@ const User = require('../../model/userModel');
 // const { body, validationResult } = require('express-validator');
 // const bcrypt = require('bcrypt');
 const express = require('express');
-// const router = express.Router();
-// const flash = require('express-flash');
-// const otpModel = require('../../model/otpModel');
+
 const productModel = require('../../model/productModel');
 const Address = require('../../model/addressModel');
 const Wallet = require('../../model/walletModel');
