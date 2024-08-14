@@ -1,19 +1,18 @@
 
 const User = require('../../model/userModel');
-const { body, validationResult } = require('express-validator');
-const bcrypt = require('bcrypt');
+// const { body, validationResult } = require('express-validator');
+// const bcrypt = require('bcrypt');
 const express = require('express');
-const router = express.Router();
-const flash = require('express-flash');
-const otpModel = require('../../model/otpModel');
+// const router = express.Router();
+// const flash = require('express-flash');
+// const otpModel = require('../../model/otpModel');
 const productModel = require('../../model/productModel');
 const Address = require('../../model/addressModel');
 const Wallet = require('../../model/walletModel');
 const Category = require('../../model/categoryModel');
 // const { sendOTP } = require('../controller/userController/otpController');
-const isAuthenticated = require('../../../middelware/userAuth'); // Import the isAuthenticated function
+// const isAuthenticated = require('../../../middelware/userAuth'); // Import the isAuthenticated function
 
-const shortid = require('shortid');
 const Coupon = require('../../model/couponModel');
 const Wishlist = require('../../model/wishlistModel'); 
 
